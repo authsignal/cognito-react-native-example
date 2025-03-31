@@ -30,8 +30,6 @@ export function SignInScreen({navigation}: any) {
 
             const {username} = data;
 
-            console.log('username', username);
-
             try {
               const {session} = await initiateAuth(username);
 
