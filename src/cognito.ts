@@ -12,13 +12,11 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// TODO: Replace with your Cognito region
+// TODO: Replace with your Cognito region and user pool client ID
 const region = 'us-west-2';
+const cognitoUserPoolClientId = '';
 
 export const cognito = new CognitoIdentityProviderClient({region});
-
-// TODO: Replace with your Cognito User Pool ID
-export const cognitoUserPoolClientId = '';
 
 interface SignUpInput {
   username: string;
