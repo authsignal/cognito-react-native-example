@@ -1,26 +1,18 @@
 import React, {useEffect} from 'react';
-import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
+import {ScrollView, StyleSheet, Text} from 'react-native';
 
-import {authsignal} from './config';
+import {authsignal} from './authsignal';
 
-export function HomeScreen() {
+export function HomeScreen({navigation}: any) {
   useEffect(() => {
     (async () => {
       const isPasskeyAvailable = await authsignal.passkey.isAvailableOnDevice();
 
-      if (isPasskeyAvailable) {
-        return;
-      }
-
-      const {error} = await authsignal.passkey.signUp();
-
-      if (!error) {
-        Alert.alert('Passkey created.');
-      } else {
-        Alert.alert('Error creating passkey', error);
+      if (!isPasskeyAvailable) {
+        navigation.navigate('CreatePasskey');
       }
     })();
-  }, []);
+  }, [navigation]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

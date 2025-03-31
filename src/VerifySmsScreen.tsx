@@ -1,15 +1,14 @@
-import {ChallengeNameType, RespondToAuthChallengeCommand} from '@aws-sdk/client-cognito-identity-provider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useCallback, useEffect, useState} from 'react';
-import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity} from 'react-native';
+import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {sha256} from 'react-native-sha256';
 
 import {Button} from './Button';
-import {authsignal, cognito, cognitoUserPoolClientId} from './config';
-import {useAuthContext} from './context';
+import {authsignal} from './authsignal';
+import {useAppContext} from './context';
+import {respondToAuthChallenge, getUserAttributes} from './cognito';
 
 export function VerifySmsScreen({route}: any) {
-  const {setIsSignedIn} = useAuthContext();
+  const {setIsSignedIn, setHasCompletedRegistration} = useAppContext();
 
   const [code, setCode] = useState('');
 
@@ -29,6 +28,8 @@ export function VerifySmsScreen({route}: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>Confirm your number</Text>
+      <Text style={styles.text}>Enter the code sent to {phoneNumber}</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter verification code"
@@ -46,41 +47,29 @@ export function VerifySmsScreen({route}: any) {
           } else {
             const username = await sha256(phoneNumber);
 
-            const respondToAuthChallengeCommand = new RespondToAuthChallengeCommand({
-              ClientId: cognitoUserPoolClientId,
-              ChallengeName: ChallengeNameType.CUSTOM_CHALLENGE,
-              Session: session,
-              ChallengeResponses: {
-                USERNAME: username,
-                ANSWER: data.token,
-              },
-            });
+            await respondToAuthChallenge({session, username, answer: data.token});
 
-            const respondToAuthChallengeOutput = await cognito.send(respondToAuthChallengeCommand);
+            const {hasCompletedRegistration} = await getUserAttributes();
 
-            const accessToken = respondToAuthChallengeOutput.AuthenticationResult?.AccessToken;
-
-            if (!accessToken) {
-              throw new Error('Cognito did not return an access token');
-            }
-
-            await AsyncStorage.setItem('@access_token', accessToken);
-
+            setHasCompletedRegistration(hasCompletedRegistration);
             setIsSignedIn(true);
           }
         }}>
-        Verify
+        Confirm
       </Button>
-      <TouchableOpacity
-        onPress={async () => {
-          setCode('');
+      <View style={styles.center}>
+        <Text>Didn't receive a code?</Text>
+        <TouchableOpacity
+          onPress={async () => {
+            setCode('');
 
-          await sendSms();
+            await sendSms();
 
-          Alert.alert('Verification code re-sent');
-        }}>
-        <Text style={styles.link}>Re-send code</Text>
-      </TouchableOpacity>
+            Alert.alert('Verification code re-sent');
+          }}>
+          <Text style={styles.link}>Re-send it</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -89,20 +78,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#F5FCFF',
   },
   input: {
     alignSelf: 'stretch',
-    margin: 20,
+    marginVertical: 20,
     height: 50,
     borderColor: 'black',
     borderRadius: 6,
     borderWidth: 1,
     padding: 10,
+    marginHorizontal: 20,
+  },
+  text: {
+    marginHorizontal: 20,
   },
   link: {
     color: '#525EEA',
-    fontSize: 14,
+    marginLeft: 5,
+  },
+  header: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    marginHorizontal: 20,
+  },
+  center: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginHorizontal: 20,
   },
 });

@@ -2,36 +2,56 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useMemo, useState} from 'react';
+import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import {AccountDetailsScreen} from './AccountDetailsScreen';
+import {CreatePasskeyScreen} from './CreatePasskeyScreen';
+import {EmailScreen} from './EmailScreen';
 import {HomeScreen} from './HomeScreen';
 import {SignInScreen} from './SignInScreen';
 import {SignInSmsScreen} from './SignInSmsScreen';
 import {VerifySmsScreen} from './VerifySmsScreen';
-import {AuthContext, useAuthContext} from './context';
-import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {AppContext, useAppContext} from './context';
+import {getUserAttributes} from './cognito';
 
 const Stack = createStackNavigator();
 
 function App() {
   const [initialized, setInitialized] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [hasCompletedRegistration, setHasCompletedRegistration] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem('@access_token')
-      .then(accessToken => {
-        setIsSignedIn(!!accessToken);
-      })
-      .catch(() => {})
-      .finally(() => setInitialized(true));
+    const initUser = async () => {
+      const accessToken = await AsyncStorage.getItem('@access_token');
+
+      setIsSignedIn(!!accessToken);
+
+      if (!accessToken) {
+        setInitialized(true);
+
+        return;
+      }
+
+      const userAttributes = await getUserAttributes();
+
+      setHasCompletedRegistration(userAttributes.hasCompletedRegistration);
+
+      setInitialized(true);
+    };
+
+    initUser();
   }, []);
 
-  const authContext = useMemo(
+  const appContext = useMemo(
     () => ({
       isSignedIn,
+      hasCompletedRegistration,
       setIsSignedIn,
+      setHasCompletedRegistration,
     }),
-    [isSignedIn],
+    [isSignedIn, hasCompletedRegistration],
   );
 
   if (!initialized) {
@@ -39,11 +59,11 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={authContext}>
+    <AppContext.Provider value={appContext}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{animationEnabled: false, headerShown: false}}>
           {isSignedIn ? (
-            <Stack.Screen name="SignedIn" component={SignedInStack} />
+            <Stack.Screen name="SignedInStack" component={SignedInStack} />
           ) : (
             <>
               <Stack.Screen name="SignIn" component={SignInScreen} />
@@ -59,20 +79,29 @@ function App() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
-    </AuthContext.Provider>
+    </AppContext.Provider>
   );
 }
 
 export default App;
 
 function SignedInStack() {
-  const {setIsSignedIn} = useAuthContext();
+  const {hasCompletedRegistration, setIsSignedIn} = useAppContext();
 
   const onSignOutPressed = async () => {
     await AsyncStorage.removeItem('@access_token');
 
     setIsSignedIn(false);
   };
+
+  if (!hasCompletedRegistration) {
+    return (
+      <Stack.Navigator screenOptions={{headerTitle: ''}}>
+        <Stack.Screen name="Email" component={EmailScreen} />
+        <Stack.Screen name="AccountDetails" component={AccountDetailsScreen} />
+      </Stack.Navigator>
+    );
+  }
 
   return (
     <Stack.Navigator>
@@ -109,6 +138,16 @@ function SignedInStack() {
           ),
         }}
       />
+      <Stack.Group
+        screenOptions={{
+          animationEnabled: true,
+          headerShown: true,
+          presentation: 'modal',
+          headerTitle: '',
+          headerBackTitle: 'Back',
+        }}>
+        <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
+      </Stack.Group>
     </Stack.Navigator>
   );
 }
@@ -120,14 +159,14 @@ function SignInSmsStack() {
         name="SignInSms"
         component={SignInSmsScreen}
         options={{
-          title: 'Sign in with SMS',
+          title: '',
         }}
       />
       <Stack.Screen
         name="VerifySms"
         component={VerifySmsScreen}
         options={{
-          title: 'Verify SMS',
+          title: '',
         }}
       />
     </Stack.Navigator>

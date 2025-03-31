@@ -1,21 +1,14 @@
-import {
-  AuthFlowType,
-  ChallengeNameType,
-  InitiateAuthCommand,
-  RespondToAuthChallengeCommand,
-} from '@aws-sdk/client-cognito-identity-provider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, View} from 'react-native';
 import {ErrorCode} from 'react-native-authsignal';
 
 import {Button} from './Button';
-import {authsignal, cognito, cognitoUserPoolClientId} from './config';
-import {useAuthContext} from './context';
-import {sha256} from 'react-native-sha256';
+import {authsignal} from './authsignal';
+import {useAppContext} from './context';
+import {getUserAttributes, initiateAuth, respondToAuthChallenge} from './cognito';
 
 export function SignInScreen({navigation}: any) {
-  const {setIsSignedIn} = useAuthContext();
+  const {setIsSignedIn, setHasCompletedRegistration} = useAppContext();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,53 +24,31 @@ export function SignInScreen({navigation}: any) {
               return navigation.navigate('SignInSmsStack');
             }
 
+            if (!data || !data.token || !data.username) {
+              return;
+            }
+
+            const {username} = data;
+
+            console.log('username', username);
+
             try {
-              if (data?.username && data?.token) {
-                const username = await sha256(data.username);
+              const {session} = await initiateAuth(username);
 
-                const initiateAuthCommand = new InitiateAuthCommand({
-                  ClientId: cognitoUserPoolClientId,
-                  AuthFlow: AuthFlowType.CUSTOM_AUTH,
-                  AuthParameters: {
-                    USERNAME: username,
-                  },
-                });
+              await respondToAuthChallenge({session, username, answer: data.token});
 
-                const initiateAuthOutput = await cognito.send(initiateAuthCommand);
+              const {hasCompletedRegistration} = await getUserAttributes();
 
-                if (!initiateAuthOutput.Session) {
-                  throw new Error('Cognito could not start custom auth flow');
-                }
+              setHasCompletedRegistration(hasCompletedRegistration);
 
-                const respondToAuthChallengeCommand = new RespondToAuthChallengeCommand({
-                  ClientId: cognitoUserPoolClientId,
-                  ChallengeName: ChallengeNameType.CUSTOM_CHALLENGE,
-                  Session: initiateAuthOutput.Session,
-                  ChallengeResponses: {
-                    USERNAME: username,
-                    ANSWER: data.token,
-                  },
-                });
-
-                const respondToAuthChallengeOutput = await cognito.send(respondToAuthChallengeCommand);
-
-                const accessToken = respondToAuthChallengeOutput.AuthenticationResult?.AccessToken;
-
-                if (!accessToken) {
-                  throw new Error('Cognito did not return an access token');
-                }
-
-                await AsyncStorage.setItem('@access_token', accessToken);
-
-                setIsSignedIn(true);
-              }
+              setIsSignedIn(true);
             } catch (error) {
               if (error instanceof Error) {
                 Alert.alert('Error', error.message);
               }
             }
           }}>
-          Sign in
+          Continue
         </Button>
       </View>
     </SafeAreaView>

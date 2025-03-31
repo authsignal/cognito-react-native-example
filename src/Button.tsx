@@ -3,19 +3,20 @@ import {ActivityIndicator, StyleSheet, Text, TouchableOpacity} from 'react-nativ
 
 interface Props {
   children: any;
+  disabled?: boolean;
   theme?: 'primary' | 'secondary';
   onPress: () => Promise<void> | void;
 }
 
 const blue = '#525EEA';
 
-export const Button = ({children, theme = 'primary', onPress}: Props) => {
+export const Button = ({children, disabled, theme = 'primary', onPress}: Props) => {
   const [loading, setLoading] = useState(false);
 
   return (
     <TouchableOpacity
       style={[styles.background, theme === 'primary' ? styles.backgroundPrimary : styles.backgroundSecondary]}
-      disabled={loading}
+      disabled={disabled ?? loading}
       onPress={async () => {
         setLoading(true);
 
