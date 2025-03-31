@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useMemo, useState} from 'react';
@@ -13,7 +12,7 @@ import {SignInScreen} from './SignInScreen';
 import {SignInSmsScreen} from './SignInSmsScreen';
 import {VerifySmsScreen} from './VerifySmsScreen';
 import {AppContext, useAppContext} from './context';
-import {getUserAttributes} from './cognito';
+import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 
 const Stack = createStackNavigator();
 
@@ -24,19 +23,15 @@ function App() {
 
   useEffect(() => {
     const initUser = async () => {
-      const accessToken = await AsyncStorage.getItem('@access_token');
+      const accessToken = await getAccessToken();
 
       setIsSignedIn(!!accessToken);
 
-      if (!accessToken) {
-        setInitialized(true);
+      if (accessToken) {
+        const userAttributes = await getUserAttributes();
 
-        return;
+        setHasCompletedRegistration(userAttributes.hasCompletedRegistration);
       }
-
-      const userAttributes = await getUserAttributes();
-
-      setHasCompletedRegistration(userAttributes.hasCompletedRegistration);
 
       setInitialized(true);
     };
@@ -89,7 +84,7 @@ function SignedInStack() {
   const {hasCompletedRegistration, setIsSignedIn} = useAppContext();
 
   const onSignOutPressed = async () => {
-    await AsyncStorage.removeItem('@access_token');
+    await clearAccessToken();
 
     setIsSignedIn(false);
   };
@@ -118,7 +113,7 @@ function SignedInStack() {
             <TouchableOpacity
               style={styles.headerRight}
               onPress={async () => {
-                const accessToken = await AsyncStorage.getItem('@access_token');
+                const accessToken = await getAccessToken();
 
                 if (!accessToken) {
                   return;

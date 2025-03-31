@@ -95,12 +95,8 @@ export async function respondToAuthChallenge({session, username, answer}: Comple
   await AsyncStorage.setItem('@access_token', accessToken);
 }
 
-export async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string | null> {
   const accessToken = await AsyncStorage.getItem('@access_token');
-
-  if (!accessToken) {
-    throw new Error('Access token not found');
-  }
 
   return accessToken;
 }
@@ -111,6 +107,10 @@ export async function clearAccessToken(): Promise<void> {
 
 export async function updateEmail(email: string) {
   const accessToken = await getAccessToken();
+
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
 
   const updateUserAttributesCommand = new UpdateUserAttributesCommand({
     UserAttributes: [
@@ -137,6 +137,10 @@ export async function completeRegistration({
   birthdate,
 }: CompleteRegistrationInput): Promise<void> {
   const accessToken = await getAccessToken();
+
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
 
   const updateUserAttributesCommand = new UpdateUserAttributesCommand({
     UserAttributes: [
@@ -175,6 +179,10 @@ interface UserAttributes {
 
 export async function getUserAttributes(): Promise<UserAttributes> {
   const accessToken = await getAccessToken();
+
+  if (!accessToken) {
+    throw new Error('No access token found');
+  }
 
   const getUserCommand = new GetUserCommand({
     AccessToken: accessToken,

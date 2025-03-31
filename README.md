@@ -6,7 +6,7 @@
 // TODO: Replace with your Authsignal tenant ID and the base URL for your region
 const authsignalArgs = {
   tenantID: '',
-  baseURL: 'https://au.api.authsignal.com/v1',
+  baseURL: 'https://api.authsignal.com/v1',
 };
 ```
 
