@@ -56,7 +56,7 @@ function App() {
   return (
     <AppContext.Provider value={appContext}>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{animationEnabled: false, headerShown: false}}>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
           {isSignedIn ? (
             <Stack.Screen name="SignedInStack" component={SignedInStack} />
           ) : (
@@ -64,7 +64,6 @@ function App() {
               <Stack.Screen name="SignIn" component={SignInScreen} />
               <Stack.Group
                 screenOptions={{
-                  animationEnabled: true,
                   headerShown: true,
                   presentation: 'modal',
                 }}>
@@ -135,7 +134,6 @@ function SignedInStack() {
       />
       <Stack.Group
         screenOptions={{
-          animationEnabled: true,
           headerShown: true,
           presentation: 'modal',
           headerTitle: '',
@@ -149,7 +147,7 @@ function SignedInStack() {
 
 function SignInSmsStack() {
   return (
-    <Stack.Navigator screenOptions={{headerBackTitleVisible: false}}>
+    <Stack.Navigator screenOptions={{headerBackTitle: ' '}}>
       <Stack.Screen
         name="SignInSms"
         component={SignInSmsScreen}
