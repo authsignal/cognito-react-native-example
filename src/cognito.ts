@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // TODO: Replace with your Cognito region and user pool client ID
 const region = 'us-west-2';
-const cognitoUserPoolClientId = '';
+const userPoolClientId = '';
 
 export const cognito = new CognitoIdentityProviderClient({region});
 
@@ -25,7 +25,7 @@ interface SignUpInput {
 
 export async function signUp({username, phoneNumber}: SignUpInput): Promise<void> {
   const signUpCommand = new SignUpCommand({
-    ClientId: cognitoUserPoolClientId,
+    ClientId: userPoolClientId,
     Username: username,
     Password: Math.random().toString(36).slice(-16) + 'X', // Dummy value - never used
     UserAttributes: [
@@ -47,7 +47,7 @@ interface InitiateAuthResponse {
 
 export async function initiateAuth(username: string): Promise<InitiateAuthResponse> {
   const initiateAuthCommand = new InitiateAuthCommand({
-    ClientId: cognitoUserPoolClientId,
+    ClientId: userPoolClientId,
     AuthFlow: AuthFlowType.CUSTOM_AUTH,
     AuthParameters: {
       USERNAME: username,
@@ -75,7 +75,7 @@ interface CompleteSignInInput {
 
 export async function respondToAuthChallenge({session, username, answer}: CompleteSignInInput): Promise<void> {
   const respondToAuthChallengeCommand = new RespondToAuthChallengeCommand({
-    ClientId: cognitoUserPoolClientId,
+    ClientId: userPoolClientId,
     ChallengeName: ChallengeNameType.CUSTOM_CHALLENGE,
     Session: session,
     ChallengeResponses: {
