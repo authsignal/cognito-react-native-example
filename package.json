@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "3.354.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.787.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/stack": "^7.2.10",
@@ -23,10 +23,12 @@
     "react-native-screens": "^4.10.0",
     "react-native-sha256": "^1.4.10",
     "react-native-url-polyfill": "^2.0.0",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "web-streams-polyfill": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-class-static-block": "^7.26.0",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "18.0.0",
