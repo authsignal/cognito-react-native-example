@@ -16,12 +16,15 @@ export function SignInScreen({navigation}: any) {
         <Image source={require('../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
         <Button
           onPress={async () => {
-            const {data, errorCode} = await authsignal.passkey.signIn({
+            const {data, errorCode, error} = await authsignal.passkey.signIn({
               action: 'cognitoAuth',
             });
 
             if (errorCode === ErrorCode.user_canceled || errorCode === ErrorCode.no_credential) {
               return navigation.navigate('SignInSmsStack');
+            } else if (errorCode) {
+              Alert.alert('Error', error ?? 'An unknown error occurred');
+              return;
             }
 
             if (!data || !data.token || !data.username) {
@@ -40,9 +43,9 @@ export function SignInScreen({navigation}: any) {
               setHasCompletedRegistration(hasCompletedRegistration);
 
               setIsSignedIn(true);
-            } catch (error) {
-              if (error instanceof Error) {
-                Alert.alert('Error', error.message);
+            } catch (err) {
+              if (err instanceof Error) {
+                Alert.alert('Error', err.message);
               }
             }
           }}>

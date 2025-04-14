@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "MobileSdkExample.app"
-               BlueprintName = "MobileSdkExample"
-               ReferencedContainer = "container:MobileSdkExample.xcodeproj">
+               BuildableName = "SmsExample.app"
+               BlueprintName = "SmsExample"
+               ReferencedContainer = "container:SmsExample.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "MobileSdkExampleTests.xctest"
-               BlueprintName = "MobileSdkExampleTests"
-               ReferencedContainer = "container:MobileSdkExample.xcodeproj">
+               BuildableName = "SmsExampleTests.xctest"
+               BlueprintName = "SmsExampleTests"
+               ReferencedContainer = "container:SmsExample.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MobileSdkExample.app"
-            BlueprintName = "MobileSdkExample"
-            ReferencedContainer = "container:MobileSdkExample.xcodeproj">
+            BuildableName = "SmsExample.app"
+            BlueprintName = "SmsExample"
+            ReferencedContainer = "container:SmsExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "MobileSdkExample.app"
-            BlueprintName = "MobileSdkExample"
-            ReferencedContainer = "container:MobileSdkExample.xcodeproj">
+            BuildableName = "SmsExample.app"
+            BlueprintName = "SmsExample"
+            ReferencedContainer = "container:SmsExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
