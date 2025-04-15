@@ -54,7 +54,8 @@ export function SignInScreen({navigation}: any) {
     }
 
     signInWithPasskey();
-  }, [navigation, setUsername, setVerifiedEmail, setNames]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
