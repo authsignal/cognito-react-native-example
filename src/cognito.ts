@@ -8,10 +8,10 @@ import {
   SignUpCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import {AWS_REGION, USER_POOL_CLIENT_ID} from '@env';
+import {REGION, USER_POOL_CLIENT_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
+export const cognito = new CognitoIdentityProviderClient({region: REGION});
 
 interface SignUpInput {
   username: string;
@@ -120,17 +120,7 @@ export async function updateEmail(email: string) {
   await cognito.send(updateUserAttributesCommand);
 }
 
-interface CompleteRegistrationInput {
-  givenName: string;
-  familyName: string;
-  birthdate?: string;
-}
-
-export async function completeRegistration({
-  givenName,
-  familyName,
-  birthdate,
-}: CompleteRegistrationInput): Promise<void> {
+export async function updateNames(givenName: string, familyName: string) {
   const accessToken = await getAccessToken();
 
   if (!accessToken) {
@@ -147,14 +137,6 @@ export async function completeRegistration({
         Name: 'family_name',
         Value: familyName,
       },
-      {
-        Name: 'birthdate',
-        Value: birthdate,
-      },
-      {
-        Name: 'custom:has_registered',
-        Value: 'true',
-      },
     ],
     AccessToken: accessToken,
   });
@@ -166,10 +148,9 @@ interface UserAttributes {
   username?: string;
   phoneNumber?: string;
   email?: string;
+  emailVerified: boolean;
   givenName?: string;
   familyName?: string;
-  birthdate?: string;
-  hasCompletedRegistration: boolean;
 }
 
 export async function getUserAttributes(): Promise<UserAttributes> {
@@ -189,20 +170,16 @@ export async function getUserAttributes(): Promise<UserAttributes> {
 
   const phoneNumber = getUserOutput.UserAttributes?.find(attr => attr.Name === 'phone_number')?.Value;
   const email = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email')?.Value;
+  const emailVerified = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email_verified')?.Value === 'true';
   const givenName = getUserOutput.UserAttributes?.find(attr => attr.Name === 'given_name')?.Value;
   const familyName = getUserOutput.UserAttributes?.find(attr => attr.Name === 'family_name')?.Value;
-  const birthdate = getUserOutput.UserAttributes?.find(attr => attr.Name === 'birthdate')?.Value;
-
-  const hasCompletedRegistration =
-    getUserOutput.UserAttributes?.find(attr => attr.Name === 'custom:has_registered')?.Value === 'true';
 
   return {
     username,
     phoneNumber,
     email,
+    emailVerified,
     givenName,
     familyName,
-    birthdate,
-    hasCompletedRegistration,
   };
 }

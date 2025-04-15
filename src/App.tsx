@@ -4,12 +4,12 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import {AccountDetailsScreen} from './AccountDetailsScreen';
 import {CreatePasskeyScreen} from './CreatePasskeyScreen';
 import {EmailScreen} from './EmailScreen';
 import {HomeScreen} from './HomeScreen';
+import {NameScreen} from './NameScreen';
 import {SignInScreen} from './SignInScreen';
-import {SignInSmsScreen} from './SignInSmsScreen';
+import {VerifyEmailScreen} from './VerifyEmailScreen';
 import {VerifySmsScreen} from './VerifySmsScreen';
 import {AppContext, useAppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
@@ -18,19 +18,28 @@ const Stack = createStackNavigator();
 
 function App() {
   const [initialized, setInitialized] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [hasCompletedRegistration, setHasCompletedRegistration] = useState(false);
+  const [username, setUsername] = useState<string | undefined>();
+  const [email, setEmail] = useState<string | undefined>();
+  const [givenName, setGivenName] = useState<string | undefined>();
+  const [familyName, setFamilyName] = useState<string | undefined>();
 
   useEffect(() => {
     const initUser = async () => {
       const accessToken = await getAccessToken();
 
-      setIsSignedIn(!!accessToken);
-
       if (accessToken) {
-        const userAttributes = await getUserAttributes();
+        const attr = await getUserAttributes();
 
-        setHasCompletedRegistration(userAttributes.hasCompletedRegistration);
+        if (attr.email) {
+          setEmail(attr.email);
+        }
+
+        if (attr.givenName && attr.familyName) {
+          setGivenName(attr.givenName);
+          setFamilyName(attr.familyName);
+        }
+
+        setUsername(attr.username);
       }
 
       setInitialized(true);
@@ -39,14 +48,26 @@ function App() {
     initUser();
   }, []);
 
+  function setVerifiedEmail(value?: string) {
+    setEmail(value);
+  }
+
+  function setNames(gn?: string, fn?: string) {
+    setGivenName(gn);
+    setFamilyName(fn);
+  }
+
   const appContext = useMemo(
     () => ({
-      isSignedIn,
-      hasCompletedRegistration,
-      setIsSignedIn,
-      setHasCompletedRegistration,
+      username,
+      email,
+      givenName,
+      familyName,
+      setUsername,
+      setVerifiedEmail,
+      setNames,
     }),
-    [isSignedIn, hasCompletedRegistration],
+    [username, email, givenName, familyName],
   );
 
   if (!initialized) {
@@ -57,7 +78,7 @@ function App() {
     <AppContext.Provider value={appContext}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{headerShown: false}}>
-          {isSignedIn ? (
+          {username ? (
             <Stack.Screen name="SignedInStack" component={SignedInStack} />
           ) : (
             <>
@@ -67,7 +88,14 @@ function App() {
                   headerShown: true,
                   presentation: 'modal',
                 }}>
-                <Stack.Screen name="SignInSmsStack" component={SignInSmsStack} options={{headerShown: false}} />
+                <Stack.Screen
+                  name="VerifySms"
+                  component={VerifySmsScreen}
+                  options={{
+                    title: '',
+                    headerBackTitle: 'Back',
+                  }}
+                />
               </Stack.Group>
             </>
           )}
@@ -80,19 +108,29 @@ function App() {
 export default App;
 
 function SignedInStack() {
-  const {hasCompletedRegistration, setIsSignedIn} = useAppContext();
+  const {email, givenName, familyName, setUsername, setVerifiedEmail, setNames} = useAppContext();
 
   const onSignOutPressed = async () => {
     await clearAccessToken();
 
-    setIsSignedIn(false);
+    setUsername(undefined);
+    setVerifiedEmail(undefined);
+    setNames(undefined, undefined);
   };
 
-  if (!hasCompletedRegistration) {
+  if (!email) {
     return (
       <Stack.Navigator screenOptions={{headerTitle: ''}}>
         <Stack.Screen name="Email" component={EmailScreen} />
-        <Stack.Screen name="AccountDetails" component={AccountDetailsScreen} />
+        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  if (!givenName || !familyName) {
+    return (
+      <Stack.Navigator screenOptions={{headerTitle: ''}}>
+        <Stack.Screen name="Name" component={NameScreen} />
       </Stack.Navigator>
     );
   }
@@ -112,13 +150,7 @@ function SignedInStack() {
             <TouchableOpacity
               style={styles.headerRight}
               onPress={async () => {
-                const accessToken = await getAccessToken();
-
-                if (!accessToken) {
-                  return;
-                }
-
-                Alert.alert('Current access token', accessToken, [
+                Alert.alert('Do you want to sign out?', '', [
                   {
                     text: 'Cancel',
                     style: 'cancel',
@@ -134,34 +166,11 @@ function SignedInStack() {
       />
       <Stack.Group
         screenOptions={{
-          headerShown: true,
           presentation: 'modal',
-          headerTitle: '',
-          headerBackTitle: 'Back',
+          headerShown: false,
         }}>
         <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
       </Stack.Group>
-    </Stack.Navigator>
-  );
-}
-
-function SignInSmsStack() {
-  return (
-    <Stack.Navigator screenOptions={{headerBackTitle: ' '}}>
-      <Stack.Screen
-        name="SignInSms"
-        component={SignInSmsScreen}
-        options={{
-          title: '',
-        }}
-      />
-      <Stack.Screen
-        name="VerifySms"
-        component={VerifySmsScreen}
-        options={{
-          title: '',
-        }}
-      />
     </Stack.Navigator>
   );
 }

@@ -3,32 +3,28 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
 
 import {Button} from './Button';
 import {authsignal} from './authsignal';
+import {verifyEmail} from './api';
 import {useAppContext} from './context';
-import {respondToAuthChallenge, getUserAttributes} from './cognito';
 
-export function VerifySmsScreen({route}: any) {
-  const {setUsername, setVerifiedEmail, setNames} = useAppContext();
+export function VerifyEmailScreen({route}: any) {
+  const {setVerifiedEmail} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {phoneNumber, isEnrolled, session} = route.params;
+  const {email} = route.params;
 
-  const sendSms = useCallback(async () => {
-    if (isEnrolled) {
-      await authsignal.sms.challenge();
-    } else {
-      await authsignal.sms.enroll({phoneNumber});
-    }
-  }, [phoneNumber, isEnrolled]);
+  const sendEmail = useCallback(async () => {
+    await authsignal.email.enroll({email});
+  }, [email]);
 
   useEffect(() => {
-    sendSms();
-  }, [sendSms]);
+    sendEmail();
+  }, [sendEmail]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Confirm your number</Text>
-      <Text style={styles.text}>Enter the code sent to {phoneNumber}</Text>
+      <Text style={styles.header}>Confirm your email</Text>
+      <Text style={styles.text}>Enter the code sent to {email}</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter verification code"
@@ -39,26 +35,25 @@ export function VerifySmsScreen({route}: any) {
       />
       <Button
         onPress={async () => {
-          const {data, error} = await authsignal.sms.verify({code});
+          const {data, error} = await authsignal.email.verify({code});
 
           if (error || !data?.token) {
             Alert.alert('Invalid code');
           } else {
-            const username = phoneNumber;
+            try {
+              const verifyEmailInput = {
+                email,
+                token: data.token,
+              };
 
-            await respondToAuthChallenge({session, username, answer: data.token});
+              await verifyEmail(verifyEmailInput);
 
-            const {email, emailVerified, givenName, familyName} = await getUserAttributes();
-
-            if (email && emailVerified) {
               setVerifiedEmail(email);
+            } catch (ex) {
+              if (ex instanceof Error) {
+                return Alert.alert('Error', ex.message);
+              }
             }
-
-            if (givenName && familyName) {
-              setNames(givenName, familyName);
-            }
-
-            setUsername(username);
           }
         }}>
         Confirm
@@ -69,7 +64,7 @@ export function VerifySmsScreen({route}: any) {
           onPress={async () => {
             setCode('');
 
-            await sendSms();
+            await sendEmail();
 
             Alert.alert('Verification code re-sent');
           }}>
