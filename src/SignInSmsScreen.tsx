@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
-import {sha256} from 'react-native-sha256';
 
 import {Button} from './Button';
 import {authsignal} from './authsignal';
@@ -25,7 +24,7 @@ export function SignInSmsScreen({navigation}: any) {
       />
       <Button
         onPress={async () => {
-          const username = await sha256(phoneNumber);
+          const username = phoneNumber;
 
           // Sign up user in Cognito
           // If they already exist then ignore error and continue

@@ -4,6 +4,7 @@ import {Alert, SafeAreaView, StyleSheet, Text} from 'react-native';
 import {Button} from './Button';
 import {authsignal} from './authsignal';
 import {getUserAttributes} from './cognito';
+import {addAuthenticator} from './api';
 
 export function CreatePasskeyScreen({navigation}: any) {
   return (
@@ -16,6 +17,10 @@ export function CreatePasskeyScreen({navigation}: any) {
           const userAttributes = await getUserAttributes();
 
           const {givenName, familyName, username} = userAttributes;
+
+          const authsignalToken = await addAuthenticator();
+
+          await authsignal.setToken(authsignalToken);
 
           const {error} = await authsignal.passkey.signUp({
             username,

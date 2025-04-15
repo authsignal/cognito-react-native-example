@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import {sha256} from 'react-native-sha256';
 
 import {Button} from './Button';
 import {authsignal} from './authsignal';
@@ -45,7 +44,7 @@ export function VerifySmsScreen({route}: any) {
           if (error || !data?.token) {
             Alert.alert('Invalid code');
           } else {
-            const username = await sha256(phoneNumber);
+            const username = phoneNumber;
 
             await respondToAuthChallenge({session, username, answer: data.token});
 

@@ -1,5 +1,3 @@
-import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto';
 import {
   AuthFlowType,
   ChallengeNameType,
@@ -10,13 +8,10 @@ import {
   SignUpCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import {AWS_REGION, USER_POOL_CLIENT_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// TODO: Replace with your Cognito region and user pool client ID
-const region = 'us-west-2';
-const userPoolClientId = '';
-
-export const cognito = new CognitoIdentityProviderClient({region});
+export const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
 
 interface SignUpInput {
   username: string;
@@ -25,7 +20,7 @@ interface SignUpInput {
 
 export async function signUp({username, phoneNumber}: SignUpInput): Promise<void> {
   const signUpCommand = new SignUpCommand({
-    ClientId: userPoolClientId,
+    ClientId: USER_POOL_CLIENT_ID,
     Username: username,
     Password: Math.random().toString(36).slice(-16) + 'X', // Dummy value - never used
     UserAttributes: [
@@ -47,7 +42,7 @@ interface InitiateAuthResponse {
 
 export async function initiateAuth(username: string): Promise<InitiateAuthResponse> {
   const initiateAuthCommand = new InitiateAuthCommand({
-    ClientId: userPoolClientId,
+    ClientId: USER_POOL_CLIENT_ID,
     AuthFlow: AuthFlowType.CUSTOM_AUTH,
     AuthParameters: {
       USERNAME: username,
@@ -75,7 +70,7 @@ interface CompleteSignInInput {
 
 export async function respondToAuthChallenge({session, username, answer}: CompleteSignInInput): Promise<void> {
   const respondToAuthChallengeCommand = new RespondToAuthChallengeCommand({
-    ClientId: userPoolClientId,
+    ClientId: USER_POOL_CLIENT_ID,
     ChallengeName: ChallengeNameType.CUSTOM_CHALLENGE,
     Session: session,
     ChallengeResponses: {

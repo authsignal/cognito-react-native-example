@@ -4134,6 +4134,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"babel-plugin-dotenv-import@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "babel-plugin-dotenv-import@npm:3.0.1"
+  dependencies:
+    dotenv: ^16.0.3
+  checksum: e5d99cdd79a4b593185b3c8f2ebacd1fd6cc97a345f1d867df8ae9859496da8e912a16d465f37d1512d83a67f43177d795a811ea17ed278b52bfd2c994378525
+  languageName: node
+  linkType: hard
+
 "babel-plugin-istanbul@npm:^6.1.1":
   version: 6.1.1
   resolution: "babel-plugin-istanbul@npm:6.1.1"
@@ -5026,6 +5035,13 @@ __metadata:
   dependencies:
     esutils: ^2.0.2
   checksum: fd7673ca77fe26cd5cba38d816bc72d641f500f1f9b25b83e8ce28827fe2da7ad583a8da26ab6af85f834138cf8dae9f69b0cd6ab925f52ddab1754db44d99ce
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.0.3":
+  version: 16.5.0
+  resolution: "dotenv@npm:16.5.0"
+  checksum: 6543fe87b5ddf2d60dd42df6616eec99148a5fc150cb4530fef5bda655db5204a3afa0e6f25f7cd64b20657ace4d79c0ef974bec32fdb462cad18754191e7a90
   languageName: node
   linkType: hard
 
@@ -8779,13 +8795,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-sha256@npm:^1.4.10":
-  version: 1.4.10
-  resolution: "react-native-sha256@npm:1.4.10"
-  checksum: db49be891c2eece1de582215637c463fc5636fce7d58c2e78f1e60d6847eb121d3233f12c5793f43a193df6a79852eec459ef1a7e34c70133146a9fe332f055b
-  languageName: node
-  linkType: hard
-
 "react-native-url-polyfill@npm:^2.0.0":
   version: 2.0.0
   resolution: "react-native-url-polyfill@npm:2.0.0"
@@ -9462,6 +9471,7 @@ __metadata:
     "@types/react": ^19.0.0
     "@types/react-native-vector-icons": ^6.4.18
     "@types/react-test-renderer": ^19.0.0
+    babel-plugin-dotenv-import: ^3.0.1
     eslint: ^8.19.0
     jest: ^29.6.3
     prettier: 2.8.8
@@ -9472,7 +9482,6 @@ __metadata:
     react-native-get-random-values: ^1.11.0
     react-native-safe-area-context: ^5.3.0
     react-native-screens: ^4.10.0
-    react-native-sha256: ^1.4.10
     react-native-url-polyfill: ^2.0.0
     react-native-vector-icons: ^10.2.0
     react-test-renderer: 19.0.0
