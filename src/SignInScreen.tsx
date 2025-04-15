@@ -29,8 +29,6 @@ export function SignInScreen({navigation}: any) {
       const {username} = data;
 
       try {
-        console.log('username', username);
-
         const {session} = await initiateAuth(username);
 
         await respondToAuthChallenge({session, username, answer: data.token});
