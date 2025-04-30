@@ -1,19 +1,24 @@
-# Getting Started
+This is an example React Native app referenced in our guide on how to integrate Authsignal with Amazon Cognito.
 
-1. Enter your Authsignal tenant ID and region URL in `src/authsignal.ts`
+The example is inspired by the Uber app, using SMS OTP as the primary authenticator then prompting users to create a passkey.
+
+![Sign-in with passkey](sign-in.png)
+
+The example also demonstrates how to implement the following:
+
+- Capture and verify email address as part of the initial registration flow
+- Register the mobile device for push auth
+
+## Getting started
+
+Copy `.env.example` and rename to `.env` then fill in the values for your Cognito user pool and Authsignal tenant.
 
 ```
-// TODO: Replace with your Authsignal tenant ID and the base URL for your region
-const authsignalArgs = {
-  tenantID: '',
-  baseURL: 'https://api.authsignal.com/v1',
-};
+AWS_REGION=
+USER_POOL_CLIENT_ID=
+API_GATEWAY_ID=
+AUTHSIGNAL_TENANT=
+AUTHSIGNAL_URL=
 ```
 
-2. Enter your Cognito region and user pool client ID in `src/cognito.ts`
-
-```
-// TODO: Replace with your Cognito region and user pool client ID
-const region = 'us-west-2';
-const cognitoUserPoolClientId = '';
-```
+Then install dependencies and run the app.

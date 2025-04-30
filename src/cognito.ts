@@ -8,10 +8,10 @@ import {
   SignUpCommand,
   UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import {REGION, USER_POOL_CLIENT_ID} from '@env';
+import {AWS_REGION, USER_POOL_CLIENT_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const cognito = new CognitoIdentityProviderClient({region: REGION});
+export const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
 
 interface SignUpInput {
   username: string;

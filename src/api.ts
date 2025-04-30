@@ -1,7 +1,7 @@
-import {API_GATEWAY_ID, REGION} from '@env';
+import {API_GATEWAY_ID, AWS_REGION} from '@env';
 import {getAccessToken} from './cognito';
 
-const url = `https://${API_GATEWAY_ID}.execute-api.${REGION}.amazonaws.com/authenticators`;
+const url = `https://${API_GATEWAY_ID}.execute-api.${AWS_REGION}.amazonaws.com/authenticators`;
 
 export async function addAuthenticator(): Promise<string> {
   const accessToken = await getAccessToken();
