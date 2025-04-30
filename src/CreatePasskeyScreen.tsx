@@ -1,23 +1,22 @@
 import React from 'react';
-import {Alert, SafeAreaView, StyleSheet, Text} from 'react-native';
+import {Alert, Image, SafeAreaView, StyleSheet, Text} from 'react-native';
 
 import {Button} from './Button';
 import {authsignal} from './authsignal';
-import {getUserAttributes} from './cognito';
 import {addAuthenticator} from './api';
+import {useAppContext} from './context';
 
 export function CreatePasskeyScreen({navigation}: any) {
+  const {username, givenName, familyName} = useAppContext();
+
   return (
     <SafeAreaView style={styles.container}>
+      <Image style={styles.image} resizeMode={'contain'} source={require('../images/passkey-icon.png')} />
       <Text style={styles.header}>Create a passkey</Text>
-      <Text style={styles.text}>Passkeys are a simple and secure way to sign in.</Text>
+      <Text style={styles.text}>Passkeys are easier and more secure than passwords.</Text>
 
       <Button
         onPress={async () => {
-          const userAttributes = await getUserAttributes();
-
-          const {givenName, familyName, username} = userAttributes;
-
           const authsignalToken = await addAuthenticator();
 
           await authsignal.setToken(authsignalToken);
@@ -37,6 +36,13 @@ export function CreatePasskeyScreen({navigation}: any) {
         }}>
         Create passkey
       </Button>
+      <Button
+        theme="secondary"
+        onPress={async () => {
+          navigation.goBack();
+        }}>
+        Not now
+      </Button>
     </SafeAreaView>
   );
 }
@@ -47,6 +53,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     backgroundColor: '#F5FCFF',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    marginLeft: 10,
   },
   header: {
     fontSize: 32,

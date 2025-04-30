@@ -1,17 +1,19 @@
 import React, {useContext} from 'react';
 
-type AppContextType = {
-  isSignedIn: boolean;
-  hasCompletedRegistration: boolean;
-  setIsSignedIn: (value: boolean) => void;
-  setHasCompletedRegistration: (value: boolean) => void;
+export type AppContextType = {
+  username?: string;
+  email?: string;
+  givenName?: string;
+  familyName?: string;
+  setUsername: (username?: string) => void;
+  setVerifiedEmail: (email?: string) => void;
+  setNames: (givenName?: string, familyName?: string) => void;
 };
 
 export const AppContext = React.createContext<AppContextType>({
-  isSignedIn: false,
-  hasCompletedRegistration: false,
-  setIsSignedIn: (_value: boolean) => {},
-  setHasCompletedRegistration: (_value: boolean) => {},
+  setUsername: (_username?: string) => {},
+  setVerifiedEmail: (_email?: string) => {},
+  setNames: (_givenName?: string, _familyName?: string) => {},
 });
 
 export const useAppContext = () => useContext(AppContext);

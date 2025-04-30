@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from './Button';
-import {updateEmail} from './cognito';
+import {addAuthenticator} from './api';
+import {authsignal} from './authsignal';
 
 export function EmailScreen({navigation}: any) {
   const [email, setEmail] = useState('');
@@ -19,14 +20,15 @@ export function EmailScreen({navigation}: any) {
         textContentType={'emailAddress'}
         autoCapitalize={'none'}
       />
-
       <Button
         disabled={email.length === 0}
         onPress={async () => {
           try {
-            await updateEmail(email);
+            const authsignalToken = await addAuthenticator();
 
-            navigation.navigate('AccountDetails');
+            await authsignal.setToken(authsignalToken);
+
+            navigation.navigate('VerifyEmail', {email});
           } catch (ex) {
             if (ex instanceof Error) {
               return Alert.alert('Error', ex.message);
