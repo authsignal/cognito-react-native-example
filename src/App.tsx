@@ -5,6 +5,7 @@ import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './CreatePasskeyScreen';
+import {PushChallengeScreen} from './PushChallengeScreen';
 import {EmailScreen} from './EmailScreen';
 import {HomeScreen} from './HomeScreen';
 import {NameScreen} from './NameScreen';
@@ -13,6 +14,7 @@ import {VerifyEmailScreen} from './VerifyEmailScreen';
 import {VerifySmsScreen} from './VerifySmsScreen';
 import {AppContext, useAppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
+import {authsignal} from './authsignal';
 
 const Stack = createStackNavigator();
 
@@ -113,6 +115,8 @@ function SignedInStack() {
   const onSignOutPressed = async () => {
     await clearAccessToken();
 
+    await authsignal.push.removeCredential();
+
     setUsername(undefined);
     setVerifiedEmail(undefined);
     setNames(undefined, undefined);
@@ -170,6 +174,7 @@ function SignedInStack() {
           headerShown: false,
         }}>
         <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
+        <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
       </Stack.Group>
     </Stack.Navigator>
   );

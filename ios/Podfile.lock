@@ -1,5 +1,5 @@
 PODS:
-  - Authsignal (1.0.14)
+  - Authsignal (1.0.15)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - fast_float (6.1.4)
@@ -1334,8 +1334,8 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
-  - react-native-authsignal (1.1.7):
-    - Authsignal (= 1.0.14)
+  - react-native-authsignal (1.1.8):
+    - Authsignal (= 1.0.15)
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -2112,7 +2112,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Authsignal: 02c35064fb1a845bd20b26b1e017bbd9e00fd6ac
+  Authsignal: f99529f4bfa84df6cb73a0e65e0f8b06d4422492
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
@@ -2152,7 +2152,7 @@ SPEC CHECKSUMS:
   React-logger: a0374da29c78e17da5523809c9f54c91dfef0462
   React-Mapbuffer: 08d7cddd2dcd2cc51c424931cca9ef507f7afe7b
   React-microtasksnativemodule: cd8733e55d2bc53f5342d2c8e26c8c9bae82a999
-  react-native-authsignal: 0b6f3a80abed4eee3137f3e8f862b12d2f38b2ae
+  react-native-authsignal: 4b4c55c0fb7f1d9f04d5a510a1f212e15d69a917
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-safe-area-context: 55dbcf556a51092ddf163b29febbc07dc7f14ebb
   React-NativeModulesApple: b0bd6d12dc7b554676bdd1be5c4ddaa5ff125ae0

@@ -14,9 +14,7 @@ export function SignInScreen({navigation}: any) {
 
   useEffect(() => {
     async function signInWithPasskey() {
-      const {data, errorCode} = await authsignal.passkey.signIn({
-        action: 'cognitoAuth',
-      });
+      const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
 
       if (errorCode === ErrorCode.user_canceled || errorCode === ErrorCode.no_credential) {
         return;

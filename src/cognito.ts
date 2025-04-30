@@ -146,6 +146,7 @@ export async function updateNames(givenName: string, familyName: string) {
 
 interface UserAttributes {
   username?: string;
+  userId?: string;
   phoneNumber?: string;
   email?: string;
   emailVerified: boolean;
@@ -168,6 +169,7 @@ export async function getUserAttributes(): Promise<UserAttributes> {
 
   const username = getUserOutput.Username;
 
+  const userId = getUserOutput.UserAttributes?.find(attr => attr.Name === 'sub')?.Value;
   const phoneNumber = getUserOutput.UserAttributes?.find(attr => attr.Name === 'phone_number')?.Value;
   const email = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email')?.Value;
   const emailVerified = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email_verified')?.Value === 'true';
@@ -176,6 +178,7 @@ export async function getUserAttributes(): Promise<UserAttributes> {
 
   return {
     username,
+    userId,
     phoneNumber,
     email,
     emailVerified,
