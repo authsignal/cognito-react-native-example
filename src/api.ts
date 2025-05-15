@@ -9,14 +9,18 @@ interface StartSignInInput {
   googleIdToken?: string;
 }
 
-export async function startSignIn(input: StartSignInInput) {
+interface StartSignInResponse {
+  username?: string;
+}
+
+export async function startSignIn(input: StartSignInInput): Promise<StartSignInResponse> {
   return await fetch(`${url}/start-sign-in`, {
     method: 'POST',
     body: JSON.stringify(input),
   }).then(res => res.json());
 }
 
-export async function startAddingAuthenticator() {
+export async function addAuthenticator() {
   const accessToken = await getAccessToken();
 
   const response = await fetch(`${url}/authenticators`, {
@@ -29,7 +33,7 @@ export async function startAddingAuthenticator() {
   await authsignal.setToken(response.authsignalToken);
 }
 
-export async function finishAddingAuthenticator(token: string) {
+export async function verifyAuthenticator(token: string) {
   const accessToken = await getAccessToken();
 
   await fetch(`${url}/authenticators/verify`, {

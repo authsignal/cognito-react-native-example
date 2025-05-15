@@ -1,11 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
-import {Button} from './Button';
-import {authsignal} from './authsignal';
-import {useAppContext} from './context';
-import {respondToSmsChallenge} from './cognito';
-import {finishAddingAuthenticator} from './api';
+import {Button} from '../components/Button';
+import {authsignal} from '../authsignal';
+import {useAppContext} from '../context';
+import {respondToSmsChallenge} from '../cognito';
+import {verifyAuthenticator} from '../api';
 
 export function VerifySmsScreen({navigation, route}: any) {
   const {setUserAttributes} = useAppContext();
@@ -53,7 +53,7 @@ export function VerifySmsScreen({navigation, route}: any) {
               } else {
                 // Otherwise the user is already signed in via Google
                 // In this case we need to finish verifying the SMS authenticator
-                await finishAddingAuthenticator(data.token);
+                await verifyAuthenticator(data.token);
               }
 
               const {emailVerified, givenName, familyName} = await setUserAttributes();

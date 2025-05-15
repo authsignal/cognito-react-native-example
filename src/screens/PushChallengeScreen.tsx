@@ -1,8 +1,8 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, Text} from 'react-native';
 
-import {Button} from './Button';
-import {authsignal} from './authsignal';
+import {Button} from '../components/Button';
+import {authsignal} from '../authsignal';
 
 export function PushChallengeScreen({navigation, route}: any) {
   const {challengeId} = route.params;

@@ -4,15 +4,15 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import {CreatePasskeyScreen} from './CreatePasskeyScreen';
-import {PushChallengeScreen} from './PushChallengeScreen';
-import {EnrollEmailScreen} from './EnrollEmailScreen';
-import {HomeScreen} from './HomeScreen';
-import {NameScreen} from './NameScreen';
-import {SignInScreen} from './SignInScreen';
-import {VerifyEmailScreen} from './VerifyEmailScreen';
-import {VerifySmsScreen} from './VerifySmsScreen';
-import {EnrollSmsScreen} from './EnrollSmsScreen';
+import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
+import {PushChallengeScreen} from './screens/PushChallengeScreen';
+import {EnrollEmailScreen} from './screens/EnrollEmailScreen';
+import {HomeScreen} from './screens/HomeScreen';
+import {NameScreen} from './screens/NameScreen';
+import {SignInScreen} from './screens/SignInScreen';
+import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
+import {VerifySmsScreen} from './screens/VerifySmsScreen';
+import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
 import {AppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 import {authsignal} from './authsignal';
@@ -128,11 +128,7 @@ function App() {
                 ),
               }}
             />
-            <Stack.Group
-              screenOptions={{
-                presentation: 'modal',
-                headerShown: false,
-              }}>
+            <Stack.Group screenOptions={{presentation: 'modal', headerShown: false}}>
               <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
               <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
             </Stack.Group>
@@ -171,12 +167,8 @@ function SignInModal({route}: any) {
 
   return (
     <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        title: '',
-        headerBackTitle: 'Back',
-      }}
-      initialRouteName={initialRouteName}>
+      initialRouteName={initialRouteName}
+      screenOptions={{headerShown: true, title: '', headerBackTitle: 'Back'}}>
       <Stack.Group>
         <Stack.Screen name="EnrollSms" component={EnrollSmsScreen} initialParams={route.params} />
         <Stack.Screen name="VerifySms" component={VerifySmsScreen} initialParams={route.params} />

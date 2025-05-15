@@ -55,7 +55,7 @@ export const GoogleButton = ({onPress}: GoogleButtonProps) => {
         <ActivityIndicator color={'black'} />
       ) : (
         <View style={styles.row}>
-          <Image style={styles.icon} resizeMode={'contain'} source={require('../images/google-icon.png')} />
+          <Image style={styles.icon} resizeMode={'contain'} source={require('../../images/google-icon.png')} />
           <Text style={[styles.text, styles.textSecondary]}>Continue with Google</Text>
         </View>
       )}

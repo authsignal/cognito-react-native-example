@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button} from './Button';
-import {startAddingAuthenticator} from './api';
+import {Button} from '../components/Button';
+import {addAuthenticator} from '../api';
 
 export function EnrollEmailScreen({navigation}: any) {
   const [email, setEmail] = useState('');
@@ -23,7 +23,7 @@ export function EnrollEmailScreen({navigation}: any) {
         disabled={email.length === 0}
         onPress={async () => {
           try {
-            await startAddingAuthenticator();
+            await addAuthenticator();
 
             navigation.navigate('VerifyEmail', {email});
           } catch (ex) {

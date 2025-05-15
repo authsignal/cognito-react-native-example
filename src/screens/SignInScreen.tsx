@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button, GoogleButton} from './Button';
-import {authsignal} from './authsignal';
-import {initiateSmsAuth, handlePasskeyAuth, handleGoogleAuth} from './cognito';
+import {Button, GoogleButton} from '../components/Button';
+import {authsignal} from '../authsignal';
+import {initiateSmsAuth, handlePasskeyAuth, handleGoogleAuth} from '../cognito';
 import {ErrorCode} from 'react-native-authsignal';
-import {useAppContext} from './context';
-import {signInWithGoogle} from './google';
-import {startSignIn} from './api';
+import {useAppContext} from '../context';
+import {signInWithGoogle} from '../google';
+import {startSignIn} from '../api';
 
 export function SignInScreen({navigation}: any) {
   const {setUserAttributes} = useAppContext();
@@ -53,6 +53,7 @@ export function SignInScreen({navigation}: any) {
 
       await authsignal.setToken(token);
 
+      // If this is the first timing signing in with SMS, we need to capture & verify additional attributes
       navigation.navigate('SignInModal', {username, phoneNumber, phoneNumberVerified, session});
     } catch (err) {
       if (err instanceof Error) {
@@ -75,6 +76,7 @@ export function SignInScreen({navigation}: any) {
 
       const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
+      // If this is the first time signing in with Google, we need to capture & verify additional attributes
       if (!phoneNumberVerified || !givenName || !familyName) {
         navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
       }
@@ -87,7 +89,7 @@ export function SignInScreen({navigation}: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={require('../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
+      <Image source={require('../../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
       <Text style={styles.header}>Get started with Simplify</Text>
       <Text style={styles.text}>Mobile number</Text>
       <TextInput

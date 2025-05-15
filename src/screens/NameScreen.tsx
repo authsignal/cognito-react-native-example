@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button} from './Button';
-import {useAppContext} from './context';
-import {updateNames} from './cognito';
+import {Button} from '../components/Button';
+import {useAppContext} from '../context';
+import {updateNames} from '../cognito';
 
 export function NameScreen() {
   const {setUserAttributes} = useAppContext();

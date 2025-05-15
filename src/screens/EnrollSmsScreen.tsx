@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button} from './Button';
-import {startAddingAuthenticator} from './api';
+import {Button} from '../components/Button';
+import {addAuthenticator} from '../api';
 
 export function EnrollSmsScreen({navigation}: any) {
   const [phoneNumber, setPhoneNumber] = useState('+64');
@@ -23,7 +23,7 @@ export function EnrollSmsScreen({navigation}: any) {
         disabled={phoneNumber.length === 0}
         onPress={async () => {
           try {
-            await startAddingAuthenticator();
+            await addAuthenticator();
 
             navigation.navigate('VerifySms', {phoneNumber});
           } catch (ex) {

@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
 
-import {authsignal} from './authsignal';
-import {startAddingAuthenticator} from './api';
+import {authsignal} from '../authsignal';
+import {addAuthenticator} from '../api';
 
 export function HomeScreen({navigation}: any) {
   // Prompt to create passkey
@@ -31,7 +31,7 @@ export function HomeScreen({navigation}: any) {
     }
 
     async function registerDevice() {
-      await startAddingAuthenticator();
+      await addAuthenticator();
 
       const {error} = await authsignal.push.addCredential();
 

@@ -1,10 +1,10 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
-import {Button} from './Button';
-import {authsignal} from './authsignal';
-import {finishAddingAuthenticator} from './api';
-import {useAppContext} from './context';
+import {Button} from '../components/Button';
+import {authsignal} from '../authsignal';
+import {verifyAuthenticator} from '../api';
+import {useAppContext} from '../context';
 
 export function VerifyEmailScreen({navigation, route}: any) {
   const {setUserAttributes} = useAppContext();
@@ -41,7 +41,7 @@ export function VerifyEmailScreen({navigation, route}: any) {
             Alert.alert('Invalid code');
           } else {
             try {
-              await finishAddingAuthenticator(data.token);
+              await verifyAuthenticator(data.token);
 
               const userAttributes = await setUserAttributes();
 

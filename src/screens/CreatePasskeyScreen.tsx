@@ -1,23 +1,23 @@
 import React from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, Text} from 'react-native';
 
-import {Button} from './Button';
-import {authsignal} from './authsignal';
-import {startAddingAuthenticator} from './api';
-import {useAppContext} from './context';
+import {Button} from '../components/Button';
+import {authsignal} from '../authsignal';
+import {addAuthenticator} from '../api';
+import {useAppContext} from '../context';
 
 export function CreatePasskeyScreen({navigation}: any) {
   const {username, givenName, familyName} = useAppContext();
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image style={styles.image} resizeMode={'contain'} source={require('../images/passkey-icon.png')} />
+      <Image style={styles.image} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
       <Text style={styles.header}>Create a passkey</Text>
       <Text style={styles.text}>Passkeys are easier and more secure than passwords.</Text>
 
       <Button
         onPress={async () => {
-          await startAddingAuthenticator();
+          await addAuthenticator();
 
           const {error} = await authsignal.passkey.signUp({
             username,
