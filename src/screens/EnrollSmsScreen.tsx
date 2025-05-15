@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: 'white',
   },
   header: {
     fontSize: 32,
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   input: {
+    backgroundColor: '#E8E8E8',
     alignSelf: 'stretch',
-    height: 50,
-    borderColor: 'black',
-    borderRadius: 6,
-    borderWidth: 1,
-    padding: 10,
     marginHorizontal: 20,
+    marginTop: 10,
     marginBottom: 20,
+    height: 46,
+    borderRadius: 6,
+    padding: 10,
   },
 });

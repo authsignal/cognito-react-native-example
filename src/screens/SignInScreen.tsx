@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button, GoogleButton} from '../components/Button';
+import {Button, SocialLoginButton} from '../components/Button';
 import {authsignal} from '../authsignal';
 import {initiateSmsAuth, handlePasskeyAuth, handleGoogleAuth} from '../cognito';
 import {ErrorCode} from 'react-native-authsignal';
@@ -104,7 +104,7 @@ export function SignInScreen({navigation}: any) {
       />
       <Button onPress={onPressContinue}>Continue</Button>
       <Text style={styles.or}>OR</Text>
-      <GoogleButton onPress={onPressContinueWithGoogle} />
+      <SocialLoginButton type="google" onPress={onPressContinueWithGoogle} />
     </SafeAreaView>
   );
 }
@@ -114,24 +114,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: 'white',
   },
   input: {
+    backgroundColor: '#E8E8E8',
     alignSelf: 'stretch',
     marginHorizontal: 20,
     marginTop: 10,
     marginBottom: 20,
-    height: 50,
-    borderColor: 'black',
+    height: 46,
     borderRadius: 6,
-    borderWidth: 1,
     padding: 10,
   },
   header: {
-    alignSelf: 'flex-start',
-    fontSize: 24,
+    alignSelf: 'center',
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 28,
     marginHorizontal: 20,
   },
   text: {
@@ -140,9 +139,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: '100%',
-    marginBottom: 20,
   },
   or: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
 });

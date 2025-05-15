@@ -8,8 +8,6 @@ interface Props {
   onPress: () => Promise<void> | void;
 }
 
-const blue = '#525EEA';
-
 export const Button = ({children, disabled, theme = 'primary', onPress}: Props) => {
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +23,7 @@ export const Button = ({children, disabled, theme = 'primary', onPress}: Props) 
         setLoading(false);
       }}>
       {loading ? (
-        <ActivityIndicator color={theme === 'primary' ? 'white' : blue} />
+        <ActivityIndicator color={theme === 'primary' ? 'white' : 'black'} />
       ) : (
         <Text style={[styles.text, theme === 'primary' ? styles.textPrimary : styles.textSecondary]}>{children}</Text>
       )}
@@ -33,12 +31,35 @@ export const Button = ({children, disabled, theme = 'primary', onPress}: Props) 
   );
 };
 
-interface GoogleButtonProps {
+interface SocialLoginButtonProps {
+  type: 'google' | 'apple';
   onPress: () => Promise<void> | void;
 }
 
-export const GoogleButton = ({onPress}: GoogleButtonProps) => {
+export const SocialLoginButton = ({type, onPress}: SocialLoginButtonProps) => {
   const [loading, setLoading] = useState(false);
+
+  function getImageSource() {
+    switch (type) {
+      case 'google':
+        return require('../../images/google-icon.png');
+      case 'apple':
+        return require('../../images/apple-icon.png');
+      default:
+        throw new Error('Invalid button type');
+    }
+  }
+
+  function getText() {
+    switch (type) {
+      case 'google':
+        return 'Continue with Google';
+      case 'apple':
+        return 'Continue with Apple';
+      default:
+        throw new Error('Invalid button type');
+    }
+  }
 
   return (
     <TouchableOpacity
@@ -55,8 +76,8 @@ export const GoogleButton = ({onPress}: GoogleButtonProps) => {
         <ActivityIndicator color={'black'} />
       ) : (
         <View style={styles.row}>
-          <Image style={styles.icon} resizeMode={'contain'} source={require('../../images/google-icon.png')} />
-          <Text style={[styles.text, styles.textSecondary]}>Continue with Google</Text>
+          <Image style={styles.icon} resizeMode={'contain'} source={getImageSource()} />
+          <Text style={[styles.text, styles.textSecondary]}>{getText()}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -68,32 +89,29 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 50,
-    marginBottom: 20,
+    height: 46,
+    marginBottom: 12,
     marginHorizontal: 20,
     borderRadius: 6,
     elevation: 3,
   },
   backgroundPrimary: {
-    backgroundColor: blue,
+    backgroundColor: 'black',
   },
   backgroundSecondary: {
-    backgroundColor: '#F5FCFF',
-    borderColor: blue,
-    borderWidth: 1,
+    backgroundColor: '#E8E8E8',
   },
   text: {
     fontSize: 16,
     lineHeight: 21,
     letterSpacing: 0.25,
     color: 'white',
-    fontWeight: '500',
   },
   textPrimary: {
     color: 'white',
   },
   textSecondary: {
-    color: '#525EEA',
+    color: 'black',
   },
   row: {
     flexDirection: 'row',
