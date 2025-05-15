@@ -4,22 +4,23 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
 import {Button} from './Button';
 import {authsignal} from './authsignal';
 import {useAppContext} from './context';
-import {respondToAuthChallenge, getUserAttributes} from './cognito';
+import {respondToSmsChallenge} from './cognito';
+import {finishAddingAuthenticator} from './api';
 
-export function VerifySmsScreen({route}: any) {
-  const {setUsername, setVerifiedEmail, setNames} = useAppContext();
+export function VerifySmsScreen({navigation, route}: any) {
+  const {setUserAttributes} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {phoneNumber, isEnrolled, session} = route.params;
+  const {username, phoneNumber, phoneNumberVerified, session} = route.params;
 
   const sendSms = useCallback(async () => {
-    if (isEnrolled) {
+    if (phoneNumberVerified) {
       await authsignal.sms.challenge();
     } else {
       await authsignal.sms.enroll({phoneNumber});
     }
-  }, [phoneNumber, isEnrolled]);
+  }, [phoneNumber, phoneNumberVerified]);
 
   useEffect(() => {
     sendSms();
@@ -39,26 +40,34 @@ export function VerifySmsScreen({route}: any) {
       />
       <Button
         onPress={async () => {
-          const {data, error} = await authsignal.sms.verify({code});
+          try {
+            const {data, error} = await authsignal.sms.verify({code});
 
-          if (error || !data?.token) {
-            Alert.alert('Invalid code');
-          } else {
-            const username = phoneNumber;
+            if (error || !data?.token) {
+              Alert.alert('Invalid code');
+            } else {
+              if (session) {
+                // If a Cognito session is present we're signing the user in via SMS
+                // In this case we need to respond to the Cognito challenge
+                await respondToSmsChallenge({session, username, answer: data.token});
+              } else {
+                // Otherwise the user is already signed in via Google
+                // In this case we need to finish verifying the SMS authenticator
+                await finishAddingAuthenticator(data.token);
+              }
 
-            await respondToAuthChallenge({session, username, answer: data.token});
+              const {emailVerified, givenName, familyName} = await setUserAttributes();
 
-            const {email, emailVerified, givenName, familyName} = await getUserAttributes();
-
-            if (email && emailVerified) {
-              setVerifiedEmail(email);
+              if (!emailVerified) {
+                navigation.navigate('EnrollEmail');
+              } else if (!givenName || !familyName) {
+                navigation.navigate('Name');
+              }
             }
-
-            if (givenName && familyName) {
-              setNames(givenName, familyName);
+          } catch (err) {
+            if (err instanceof Error) {
+              Alert.alert('Error', err.message);
             }
-
-            setUsername(username);
           }
         }}>
         Confirm

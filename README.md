@@ -1,13 +1,18 @@
-This is an example React Native app referenced in our [guide on how to integrate Authsignal with Amazon Cognito](https://docs.authsignal.com/integrations/aws-cognito/getting-started).
+This is an example React Native app which demonstrates [how to integrate Authsignal with Amazon Cognito](https://docs.authsignal.com/integrations/aws-cognito/getting-started).
 
-The example is inspired by the Uber app, using SMS OTP as the primary authenticator then prompting users to create a passkey.
+This app is designed to be used alongside [these Cognito lambdas](https://github.com/authsignal/cognito-lambdas).
+
+The example is inspired by the Uber app. It uses Authsignal SDKs to support the following authentication features.
+
+- Users can sign-in for the first time via SMS OTP or via Google sign-in
+- Users are prompted to create a passkey for future sign-ins
 
 ![Sign-in with passkey](sign-in.png)
 
-The example also demonstrates how to implement the following:
+The example also demonstrates how to use Authsignal SDKs to implement the following:
 
-- Capture and verify email address as part of the initial registration flow
-- Register the mobile device for push auth
+- Ensure both email and phone number are verified in the initial registration flow
+- Register the device for push auth and respond to authorization requests
 
 ## Getting started
 

@@ -1,18 +1,19 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './CreatePasskeyScreen';
 import {PushChallengeScreen} from './PushChallengeScreen';
-import {EmailScreen} from './EmailScreen';
+import {EnrollEmailScreen} from './EnrollEmailScreen';
 import {HomeScreen} from './HomeScreen';
 import {NameScreen} from './NameScreen';
 import {SignInScreen} from './SignInScreen';
 import {VerifyEmailScreen} from './VerifyEmailScreen';
 import {VerifySmsScreen} from './VerifySmsScreen';
-import {AppContext, useAppContext} from './context';
+import {EnrollSmsScreen} from './EnrollSmsScreen';
+import {AppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 import {authsignal} from './authsignal';
 
@@ -22,86 +23,126 @@ function App() {
   const [initialized, setInitialized] = useState(false);
   const [username, setUsername] = useState<string | undefined>();
   const [email, setEmail] = useState<string | undefined>();
+  const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [givenName, setGivenName] = useState<string | undefined>();
   const [familyName, setFamilyName] = useState<string | undefined>();
+
+  const setUserAttributes = useCallback(async () => {
+    const attrs = await getUserAttributes();
+
+    if (attrs.email && attrs.emailVerified) {
+      setEmail(attrs.email);
+    }
+
+    if (attrs.phoneNumber && attrs.phoneNumberVerified) {
+      setPhoneNumber(attrs.phoneNumber);
+    }
+
+    if (attrs.givenName && attrs.familyName) {
+      setGivenName(attrs.givenName);
+      setFamilyName(attrs.familyName);
+    }
+
+    setUsername(attrs.username);
+
+    return attrs;
+  }, []);
+
+  const clearUserAttributes = useCallback(() => {
+    setEmail(undefined);
+    setGivenName(undefined);
+    setFamilyName(undefined);
+    setUsername(undefined);
+  }, []);
 
   useEffect(() => {
     const initUser = async () => {
       const accessToken = await getAccessToken();
 
       if (accessToken) {
-        const attr = await getUserAttributes();
-
-        if (attr.email) {
-          setEmail(attr.email);
-        }
-
-        if (attr.givenName && attr.familyName) {
-          setGivenName(attr.givenName);
-          setFamilyName(attr.familyName);
-        }
-
-        setUsername(attr.username);
+        await setUserAttributes();
       }
 
       setInitialized(true);
     };
 
     initUser();
-  }, []);
-
-  function setVerifiedEmail(value?: string) {
-    setEmail(value);
-  }
-
-  function setNames(gn?: string, fn?: string) {
-    setGivenName(gn);
-    setFamilyName(fn);
-  }
+  }, [setUserAttributes]);
 
   const appContext = useMemo(
     () => ({
       username,
       email,
+      phoneNumber,
       givenName,
       familyName,
-      setUsername,
-      setVerifiedEmail,
-      setNames,
+      setUserAttributes,
+      clearUserAttributes,
     }),
-    [username, email, givenName, familyName],
+    [username, email, phoneNumber, givenName, familyName, setUserAttributes, clearUserAttributes],
   );
+
+  const onSignOutPressed = async () => {
+    await authsignal.push.removeCredential();
+
+    await clearAccessToken();
+
+    clearUserAttributes();
+  };
 
   if (!initialized) {
     return null;
   }
 
+  const hasAllUserAttributes = !!email && !!phoneNumber && !!givenName && !!familyName;
+
   return (
     <AppContext.Provider value={appContext}>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-          {username ? (
-            <Stack.Screen name="SignedInStack" component={SignedInStack} />
-          ) : (
-            <>
-              <Stack.Screen name="SignIn" component={SignInScreen} />
-              <Stack.Group
-                screenOptions={{
-                  headerShown: true,
-                  presentation: 'modal',
-                }}>
-                <Stack.Screen
-                  name="VerifySms"
-                  component={VerifySmsScreen}
-                  options={{
-                    title: '',
-                    headerBackTitle: 'Back',
-                  }}
-                />
-              </Stack.Group>
-            </>
-          )}
-        </Stack.Navigator>
+        {hasAllUserAttributes ? (
+          <Stack.Navigator>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{
+                // eslint-disable-next-line react/no-unstable-nested-components
+                headerTitle: () => (
+                  <Image style={styles.headerTitle} resizeMode={'contain'} source={require('../images/simplify.png')} />
+                ),
+                // eslint-disable-next-line react/no-unstable-nested-components
+                headerRight: () => (
+                  <TouchableOpacity
+                    style={styles.headerRight}
+                    onPress={async () => {
+                      Alert.alert('Do you want to sign out?', '', [
+                        {
+                          text: 'Cancel',
+                          style: 'cancel',
+                          onPress: () => {},
+                        },
+                        {text: 'Sign out', onPress: onSignOutPressed},
+                      ]);
+                    }}>
+                    <Icon name="user" size={18} color="#525eea" />
+                  </TouchableOpacity>
+                ),
+              }}
+            />
+            <Stack.Group
+              screenOptions={{
+                presentation: 'modal',
+                headerShown: false,
+              }}>
+              <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
+              <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
+            </Stack.Group>
+          </Stack.Navigator>
+        ) : (
+          <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignInModal" component={SignInModal} options={{presentation: 'modal'}} />
+          </Stack.Navigator>
+        )}
       </NavigationContainer>
     </AppContext.Provider>
   );
@@ -109,72 +150,39 @@ function App() {
 
 export default App;
 
-function SignedInStack() {
-  const {email, givenName, familyName, setUsername, setVerifiedEmail, setNames} = useAppContext();
+function SignInModal({route}: any) {
+  const {phoneNumber, phoneNumberVerified, givenName, familyName} = route.params;
 
-  const onSignOutPressed = async () => {
-    await clearAccessToken();
+  const getInitialRouteName = () => {
+    if (phoneNumber) {
+      return 'VerifySms';
+    }
 
-    await authsignal.push.removeCredential();
+    if (!phoneNumberVerified) {
+      return 'EnrollSms';
+    }
 
-    setUsername(undefined);
-    setVerifiedEmail(undefined);
-    setNames(undefined, undefined);
+    if (!givenName || !familyName) {
+      return 'Name';
+    }
   };
 
-  if (!email) {
-    return (
-      <Stack.Navigator screenOptions={{headerTitle: ''}}>
-        <Stack.Screen name="Email" component={EmailScreen} />
-        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
-      </Stack.Navigator>
-    );
-  }
-
-  if (!givenName || !familyName) {
-    return (
-      <Stack.Navigator screenOptions={{headerTitle: ''}}>
-        <Stack.Screen name="Name" component={NameScreen} />
-      </Stack.Navigator>
-    );
-  }
+  const initialRouteName = getInitialRouteName();
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          // eslint-disable-next-line react/no-unstable-nested-components
-          headerTitle: () => (
-            <Image style={styles.headerTitle} resizeMode={'contain'} source={require('../images/simplify.png')} />
-          ),
-          // eslint-disable-next-line react/no-unstable-nested-components
-          headerRight: () => (
-            <TouchableOpacity
-              style={styles.headerRight}
-              onPress={async () => {
-                Alert.alert('Do you want to sign out?', '', [
-                  {
-                    text: 'Cancel',
-                    style: 'cancel',
-                    onPress: () => {},
-                  },
-                  {text: 'Sign out', onPress: onSignOutPressed},
-                ]);
-              }}>
-              <Icon name="user" size={18} color="#525eea" />
-            </TouchableOpacity>
-          ),
-        }}
-      />
-      <Stack.Group
-        screenOptions={{
-          presentation: 'modal',
-          headerShown: false,
-        }}>
-        <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
-        <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        title: '',
+        headerBackTitle: 'Back',
+      }}
+      initialRouteName={initialRouteName}>
+      <Stack.Group>
+        <Stack.Screen name="EnrollSms" component={EnrollSmsScreen} initialParams={route.params} />
+        <Stack.Screen name="VerifySms" component={VerifySmsScreen} initialParams={route.params} />
+        <Stack.Screen name="EnrollEmail" component={EnrollEmailScreen} initialParams={route.params} />
+        <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} initialParams={route.params} />
+        <Stack.Screen name="Name" component={NameScreen} initialParams={route.params} />
       </Stack.Group>
     </Stack.Navigator>
   );

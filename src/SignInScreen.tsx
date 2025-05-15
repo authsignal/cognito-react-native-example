@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
-import {Button} from './Button';
+import {Button, GoogleButton} from './Button';
 import {authsignal} from './authsignal';
-import {signUp, initiateAuth, respondToAuthChallenge, getUserAttributes} from './cognito';
+import {initiateSmsAuth, handlePasskeyAuth, handleGoogleAuth} from './cognito';
 import {ErrorCode} from 'react-native-authsignal';
 import {useAppContext} from './context';
+import {signInWithGoogle} from './google';
+import {startSignIn} from './api';
 
 export function SignInScreen({navigation}: any) {
-  const {setUsername, setVerifiedEmail, setNames} = useAppContext();
+  const {setUserAttributes} = useAppContext();
 
   const [phoneNumber, setPhoneNumber] = useState('+64');
 
@@ -16,32 +18,14 @@ export function SignInScreen({navigation}: any) {
     async function signInWithPasskey() {
       const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
 
-      if (errorCode === ErrorCode.user_canceled || errorCode === ErrorCode.no_credential) {
+      if (errorCode === ErrorCode.user_canceled || errorCode === ErrorCode.no_credential || !data) {
         return;
       }
-
-      if (!data || !data.token || !data.username) {
-        return;
-      }
-
-      const {username} = data;
 
       try {
-        const {session} = await initiateAuth(username);
+        await handlePasskeyAuth(data);
 
-        await respondToAuthChallenge({session, username, answer: data.token});
-
-        const attrs = await getUserAttributes();
-
-        if (attrs.email && attrs.emailVerified) {
-          setVerifiedEmail(attrs.email);
-        }
-
-        if (attrs.givenName && attrs.familyName) {
-          setNames(attrs.givenName, attrs.familyName);
-        }
-
-        setUsername(attrs.username);
+        await setUserAttributes();
       } catch (error) {
         if (error instanceof Error) {
           Alert.alert('Error', error.message);
@@ -52,6 +36,54 @@ export function SignInScreen({navigation}: any) {
     signInWithPasskey();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onPressContinue = async () => {
+    try {
+      const {username} = await startSignIn({phoneNumber});
+
+      if (!username) {
+        throw new Error('startSignIn error');
+      }
+
+      const {session, token, phoneNumberVerified} = await initiateSmsAuth(username);
+
+      if (!token) {
+        throw new Error('No Authsignal token returned from Create Auth Challenge lambda');
+      }
+
+      await authsignal.setToken(token);
+
+      navigation.navigate('SignInModal', {username, phoneNumber, phoneNumberVerified, session});
+    } catch (err) {
+      if (err instanceof Error) {
+        Alert.alert('Invalid credentials', err.message);
+      }
+    }
+  };
+
+  const onPressContinueWithGoogle = async () => {
+    try {
+      const {idToken} = await signInWithGoogle();
+
+      const {username} = await startSignIn({googleIdToken: idToken});
+
+      if (!username) {
+        throw new Error('startSignIn error');
+      }
+
+      await handleGoogleAuth({username, idToken});
+
+      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
+
+      if (!phoneNumberVerified || !givenName || !familyName) {
+        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        Alert.alert('Error', err.message);
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,40 +100,9 @@ export function SignInScreen({navigation}: any) {
         autoFocus={true}
         textContentType={'telephoneNumber'}
       />
-      <Button
-        onPress={async () => {
-          const username = phoneNumber;
-
-          // Sign up user in Cognito
-          // If they already exist then ignore error and continue
-          try {
-            await signUp({username, phoneNumber});
-          } catch (ex) {
-            if (ex instanceof Error && ex.name !== 'UsernameExistsException') {
-              return Alert.alert('Error', ex.message);
-            }
-          }
-
-          // Start custom auth sign-in flow
-          // This will invoke the Create Auth Challenge lambda
-          try {
-            const {session, token, isEnrolled} = await initiateAuth(username);
-
-            if (!token) {
-              throw new Error('No Authsignal token returned from Create Auth Challenge lambda');
-            }
-
-            await authsignal.setToken(token);
-
-            navigation.navigate('VerifySms', {phoneNumber, isEnrolled, session});
-          } catch (err) {
-            if (err instanceof Error) {
-              Alert.alert('Invalid credentials', err.message);
-            }
-          }
-        }}>
-        Continue
-      </Button>
+      <Button onPress={onPressContinue}>Continue</Button>
+      <Text style={styles.or}>OR</Text>
+      <GoogleButton onPress={onPressContinueWithGoogle} />
     </SafeAreaView>
   );
 }
@@ -137,6 +138,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: '100%',
+    marginBottom: 20,
+  },
+  or: {
     marginBottom: 20,
   },
 });

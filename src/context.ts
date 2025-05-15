@@ -1,19 +1,19 @@
 import React, {useContext} from 'react';
+import {CognitoUserAttributes} from './cognito';
 
 export type AppContextType = {
   username?: string;
   email?: string;
+  phoneNumber?: string;
   givenName?: string;
   familyName?: string;
-  setUsername: (username?: string) => void;
-  setVerifiedEmail: (email?: string) => void;
-  setNames: (givenName?: string, familyName?: string) => void;
+  setUserAttributes: () => Promise<CognitoUserAttributes>;
+  clearUserAttributes: () => void;
 };
 
 export const AppContext = React.createContext<AppContextType>({
-  setUsername: (_username?: string) => {},
-  setVerifiedEmail: (_email?: string) => {},
-  setNames: (_givenName?: string, _familyName?: string) => {},
+  setUserAttributes: async () => ({phoneNumberVerified: false, emailVerified: false}),
+  clearUserAttributes: () => {},
 });
 
 export const useAppContext = () => useContext(AppContext);
