@@ -3,27 +3,30 @@ import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput} from 'react-nat
 
 import {Button, SocialLoginButton} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {initiateSmsAuth, handlePasskeyAuth, handleGoogleAuth} from '../cognito';
-import {ErrorCode} from 'react-native-authsignal';
-import {useAppContext} from '../context';
-import {signInWithGoogle} from '../google';
+import {initiateSmsAuth, handleTokenAuth} from '../cognito';
 import {startSignIn} from '../api';
+import {useAppContext} from '../context';
+import {signInWithApple} from '../apple';
+import {signInWithGoogle} from '../google';
 
 export function SignInScreen({navigation}: any) {
   const {setUserAttributes} = useAppContext();
 
   const [phoneNumber, setPhoneNumber] = useState('+64');
 
+  // Show sign-in with passkey prompt if credential available
   useEffect(() => {
     async function signInWithPasskey() {
       const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
 
-      if (errorCode === ErrorCode.user_canceled || errorCode === ErrorCode.no_credential || !data) {
+      if (errorCode === 'user_canceled' || errorCode === 'no_credential' || !data) {
         return;
       }
 
       try {
-        await handlePasskeyAuth(data);
+        const {username, token} = data;
+
+        await handleTokenAuth({username, token, signInMethod: 'PASSKEY'});
 
         await setUserAttributes();
       } catch (error) {
@@ -66,17 +69,42 @@ export function SignInScreen({navigation}: any) {
     try {
       const {idToken} = await signInWithGoogle();
 
-      const {username} = await startSignIn({googleIdToken: idToken});
+      const {username} = await startSignIn({idToken});
 
       if (!username) {
         throw new Error('startSignIn error');
       }
 
-      await handleGoogleAuth({username, idToken});
+      await handleTokenAuth({username, token: idToken, signInMethod: 'GOOGLE'});
 
       const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
       // If this is the first time signing in with Google, we need to capture & verify additional attributes
+      if (!phoneNumberVerified || !givenName || !familyName) {
+        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        Alert.alert('Error', err.message);
+      }
+    }
+  };
+
+  const onPressContinueWithApple = async () => {
+    try {
+      const {identityToken: idToken} = await signInWithApple();
+
+      const {username} = await startSignIn({idToken});
+
+      if (!username) {
+        throw new Error('startSignIn error');
+      }
+
+      await handleTokenAuth({username, token: idToken, signInMethod: 'APPLE'});
+
+      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
+
+      // If this is the first time signing in with Apple, we need to capture & verify additional attributes
       if (!phoneNumberVerified || !givenName || !familyName) {
         navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
       }
@@ -105,6 +133,7 @@ export function SignInScreen({navigation}: any) {
       <Button onPress={onPressContinue}>Continue</Button>
       <Text style={styles.or}>OR</Text>
       <SocialLoginButton type="google" onPress={onPressContinueWithGoogle} />
+      <SocialLoginButton type="apple" onPress={onPressContinueWithApple} />
     </SafeAreaView>
   );
 }

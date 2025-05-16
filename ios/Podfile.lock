@@ -1750,6 +1750,8 @@ PODS:
     - React-logger (= 0.79.0)
     - React-perflogger (= 0.79.0)
     - React-utils (= 0.79.0)
+  - RNAppleAuthentication (2.4.1):
+    - React-Core
   - RNCAsyncStorage (2.1.2):
     - DoubleConversion
     - glog
@@ -1952,6 +1954,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNAppleAuthentication (from `../node_modules/@invertase/react-native-apple-authentication`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -2113,6 +2116,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNAppleAuthentication:
+    :path: "../node_modules/@invertase/react-native-apple-authentication"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNGestureHandler:
@@ -2201,6 +2206,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: e365be84c6636b639c30133fbf1b0c8be8e95e62
   ReactCodegen: daf57f5314369a4ad607ee77516d45aad03b10d7
   ReactCommon: c07346679f14c0b62ad02b20e18e984da3b575ce
+  RNAppleAuthentication: b2d8b5ccba86b5b1e55a1a2e858f7ac6d8a21816
   RNCAsyncStorage: c1bbcf629d7206d1e19310827848b98d68a4cbaf
   RNGestureHandler: 5d8431415d4b8518e86e289e9ad5bb9be78f6dba
   RNScreens: c5c07a86e4088ce92f0d3854082250dfa9c61f75

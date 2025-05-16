@@ -86,72 +86,36 @@ export async function respondToSmsChallenge(input: RespondToAuthChallengeInput):
   await AsyncStorage.setItem('@access_token', accessToken);
 }
 
-interface PasskeyAuthInput {
+interface TokenAuthInput {
   username?: string;
-  token?: string;
+  token?: string | null;
+  signInMethod: 'PASSKEY' | 'APPLE' | 'GOOGLE';
 }
 
-export async function handlePasskeyAuth({username, token}: PasskeyAuthInput): Promise<void> {
+export async function handleTokenAuth({username, token, signInMethod}: TokenAuthInput): Promise<void> {
   if (!username || !token) {
     throw new Error('Username and token are required for passkey auth');
   }
 
   const provideAuthParamsOutput = await initiateAuth(username);
 
-  const clientMetadata = {signInMethod: 'PASSKEY'};
-
   // Provide auth params
   const authParamsOutput = await respondToAuthChallenge({
     session: provideAuthParamsOutput.Session,
     username,
-    clientMetadata,
+    clientMetadata: {signInMethod},
     answer: '__dummy__',
   });
 
-  // Verify passkey challenge with token
-  const passkeyChallengeOutput = await respondToAuthChallenge({
+  // Verify challenge with token
+  const challengeOutput = await respondToAuthChallenge({
     session: authParamsOutput.Session,
     username,
-    clientMetadata,
+    clientMetadata: {signInMethod},
     answer: token,
   });
 
-  const accessToken = passkeyChallengeOutput.AuthenticationResult?.AccessToken;
-
-  if (!accessToken) {
-    throw new Error('Cognito did not return an access token');
-  }
-
-  await AsyncStorage.setItem('@access_token', accessToken);
-}
-
-interface GoogleAuthInput {
-  username: string;
-  idToken: string;
-}
-
-export async function handleGoogleAuth({username, idToken}: GoogleAuthInput): Promise<void> {
-  const provideAuthParamsOutput = await initiateAuth(username);
-
-  const clientMetadata = {signInMethod: 'GOOGLE'};
-
-  // Provide auth params
-  const authParamsOutput = await respondToAuthChallenge({
-    session: provideAuthParamsOutput.Session,
-    username,
-    clientMetadata,
-    answer: '__dummy__',
-  });
-
-  // Verify google challenge with ID token
-  const googleChallengeOutput = await respondToAuthChallenge({
-    session: authParamsOutput.Session,
-    username,
-    clientMetadata,
-    answer: idToken,
-  });
-
-  const accessToken = googleChallengeOutput.AuthenticationResult?.AccessToken;
+  const accessToken = challengeOutput.AuthenticationResult?.AccessToken;
 
   if (!accessToken) {
     throw new Error('Cognito did not return an access token');
@@ -168,26 +132,6 @@ export async function getAccessToken(): Promise<string | null> {
 
 export async function clearAccessToken(): Promise<void> {
   await AsyncStorage.removeItem('@access_token');
-}
-
-export async function updateEmail(email: string) {
-  const accessToken = await getAccessToken();
-
-  if (!accessToken) {
-    throw new Error('No access token found');
-  }
-
-  const updateUserAttributesCommand = new UpdateUserAttributesCommand({
-    UserAttributes: [
-      {
-        Name: 'email',
-        Value: email,
-      },
-    ],
-    AccessToken: accessToken,
-  });
-
-  await cognito.send(updateUserAttributesCommand);
 }
 
 export async function updateNames(givenName: string, familyName: string) {

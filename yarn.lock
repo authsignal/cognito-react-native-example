@@ -1983,6 +1983,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@invertase/react-native-apple-authentication@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@invertase/react-native-apple-authentication@npm:2.4.1"
+  checksum: c49f1464464e1d7f08de88c5391820de17fb409e4b8dbeb7f1ab43d89ec45820cb57c8c10c8b8be4414ac2a2bd66a459013bf796db305bcd3750310f8f69ac72
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -9476,6 +9483,7 @@ __metadata:
     "@babel/plugin-transform-class-static-block": ^7.26.0
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
+    "@invertase/react-native-apple-authentication": ^2.4.1
     "@react-native-async-storage/async-storage": ^2.1.2
     "@react-native-community/cli": 18.0.0
     "@react-native-community/cli-platform-android": 18.0.0
