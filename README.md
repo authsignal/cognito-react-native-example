@@ -14,8 +14,10 @@ The example also demonstrates how to use Authsignal SDKs to implement the follow
 
 ## Example app
 
+<p float="left">
 <img src="sign-in.png" alt="sign-in" width="300"/>
 <img src="sign-in-passkey.png" alt="sign-in-passkey" width="300"/>
+</p>
 
 ## Getting started
 
