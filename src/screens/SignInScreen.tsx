@@ -14,14 +14,10 @@ export function SignInScreen({navigation}: any) {
 
   const [phoneNumber, setPhoneNumber] = useState('+64');
 
-  async function signInWithPasskey({showErrorAlert}: {showErrorAlert?: boolean} = {}) {
+  async function signInWithPasskey() {
     const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
 
     if (errorCode === 'user_canceled' || errorCode === 'no_credential' || !data) {
-      if (showErrorAlert) {
-        Alert.alert('No passkey available.');
-      }
-
       return;
     }
 
@@ -119,10 +115,6 @@ export function SignInScreen({navigation}: any) {
     navigation.navigate('SignInModal', {initialRoute: 'SignInWithEmail'});
   };
 
-  const onPressPasskeySignIn = async () => {
-    await signInWithPasskey({showErrorAlert: true});
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
@@ -139,7 +131,7 @@ export function SignInScreen({navigation}: any) {
           autoFocus={true}
           textContentType={'telephoneNumber'}
         />
-        <TouchableOpacity onPress={onPressPasskeySignIn}>
+        <TouchableOpacity onPress={signInWithPasskey}>
           <Image style={styles.passkeyIcon} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
         </TouchableOpacity>
       </View>
