@@ -106,7 +106,7 @@ interface TokenAuthInput {
 
 export async function handleTokenAuth({username, token, signInMethod}: TokenAuthInput): Promise<void> {
   if (!username || !token) {
-    throw new Error('Username and token are required for passkey auth');
+    throw new Error('Username and token are required for token auth');
   }
 
   const provideAuthParamsOutput = await initiateAuth(username);
@@ -123,7 +123,6 @@ export async function handleTokenAuth({username, token, signInMethod}: TokenAuth
   const challengeOutput = await respondToAuthChallenge({
     session: authParamsOutput.Session,
     username,
-    clientMetadata: {signInMethod},
     answer: token,
   });
 

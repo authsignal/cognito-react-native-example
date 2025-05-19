@@ -8756,13 +8756,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-authsignal@npm:1.1.8":
-  version: 1.1.8
-  resolution: "react-native-authsignal@npm:1.1.8"
+"react-native-authsignal@npm:^1.1.10":
+  version: 1.1.10
+  resolution: "react-native-authsignal@npm:1.1.10"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 425619bc8cfa353384c8f8c6e3ed209ccc87dc5363c6e96a9e2c9e49de11864555729895f5d64a28aa1e3d06c382640ae60b73bf3b37853dc489292efb99d7d0
+  checksum: 8cad59d8dc9a2d7e1dfe1818edd1c5abe6bcaaa90e27bbf22eb63d5bee2b04399a3bca9bfa18fc9096251b8c9ab9bd80773681de8588241d993849365ac1a799
   languageName: node
   linkType: hard
 
@@ -9505,7 +9505,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.79.0
     react-native-app-auth: ^8.0.2
-    react-native-authsignal: 1.1.8
+    react-native-authsignal: ^1.1.10
     react-native-gesture-handler: ^2.25.0
     react-native-get-random-values: ^1.11.0
     react-native-safe-area-context: ^5.3.0
