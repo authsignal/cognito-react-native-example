@@ -10,7 +10,7 @@ import {
 import {AWS_REGION, USER_POOL_CLIENT_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
+const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
 
 async function initiateAuth(username: string) {
   const initiateAuthCommand = new InitiateAuthCommand({
@@ -31,8 +31,10 @@ interface RespondToAuthChallengeInput {
   clientMetadata?: Record<string, string>;
 }
 
-export async function respondToAuthChallenge({session, username, answer, clientMetadata}: RespondToAuthChallengeInput) {
-  const respondToAuthChallengeCommand = new RespondToAuthChallengeCommand({
+export async function respondToAuthChallenge(input: RespondToAuthChallengeInput) {
+  const {session, username, answer, clientMetadata} = input;
+
+  const command = new RespondToAuthChallengeCommand({
     ClientId: USER_POOL_CLIENT_ID,
     ChallengeName: ChallengeNameType.CUSTOM_CHALLENGE,
     Session: session,
@@ -43,7 +45,15 @@ export async function respondToAuthChallenge({session, username, answer, clientM
     ClientMetadata: clientMetadata,
   });
 
-  return await cognito.send(respondToAuthChallengeCommand);
+  const output = await cognito.send(command);
+
+  const accessToken = output.AuthenticationResult?.AccessToken;
+
+  if (accessToken) {
+    await AsyncStorage.setItem('@access_token', accessToken);
+  }
+
+  return output;
 }
 
 export async function initiateSmsAuth(username: string) {
@@ -56,13 +66,9 @@ export async function initiateSmsAuth(username: string) {
     clientMetadata: {signInMethod: 'SMS'},
   });
 
-  const token = challengeResponse.ChallengeParameters?.token;
+  const token = challengeResponse.ChallengeParameters!.token;
   const phoneNumberVerified = challengeResponse.ChallengeParameters?.phoneNumberVerified === 'true';
   const session = challengeResponse.Session;
-
-  if (!token) {
-    throw new Error('No Authsignal token returned from Cognito');
-  }
 
   return {
     session,
@@ -71,19 +77,25 @@ export async function initiateSmsAuth(username: string) {
   };
 }
 
-export async function respondToSmsChallenge(input: RespondToAuthChallengeInput): Promise<void> {
-  const respondToAuthChallengeOutput = await respondToAuthChallenge({
-    ...input,
-    clientMetadata: {signInMethod: 'SMS'},
+export async function initiateEmailAuth(username: string) {
+  const provideAuthParamsOutput = await initiateAuth(username);
+
+  const challengeResponse = await respondToAuthChallenge({
+    session: provideAuthParamsOutput.Session,
+    username,
+    answer: '__dummy__',
+    clientMetadata: {signInMethod: 'EMAIL'},
   });
 
-  const accessToken = respondToAuthChallengeOutput.AuthenticationResult?.AccessToken;
+  const token = challengeResponse.ChallengeParameters!.token;
+  const emailVerified = challengeResponse.ChallengeParameters?.emailVerified === 'true';
+  const session = challengeResponse.Session;
 
-  if (!accessToken) {
-    throw new Error('Cognito did not return an access token');
-  }
-
-  await AsyncStorage.setItem('@access_token', accessToken);
+  return {
+    session,
+    token,
+    emailVerified,
+  };
 }
 
 interface TokenAuthInput {
@@ -134,7 +146,7 @@ export async function clearAccessToken(): Promise<void> {
   await AsyncStorage.removeItem('@access_token');
 }
 
-export async function updateNames(givenName: string, familyName: string) {
+export async function updateNameAttributes(givenName: string, familyName: string) {
   const accessToken = await getAccessToken();
 
   if (!accessToken) {

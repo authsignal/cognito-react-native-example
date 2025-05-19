@@ -3,7 +3,7 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
 import {useAppContext} from '../context';
-import {updateNames} from '../cognito';
+import {updateNameAttributes} from '../cognito';
 
 export function NameScreen() {
   const {setUserAttributes} = useAppContext();
@@ -20,7 +20,7 @@ export function NameScreen() {
         disabled={givenName.length === 0 || familyName.length === 0}
         onPress={async () => {
           try {
-            await updateNames(givenName, familyName);
+            await updateNameAttributes(givenName, familyName);
 
             await setUserAttributes();
           } catch (ex) {

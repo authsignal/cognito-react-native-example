@@ -6,10 +6,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
 import {PushChallengeScreen} from './screens/PushChallengeScreen';
-import {EnrollEmailScreen} from './screens/EnrollEmailScreen';
 import {HomeScreen} from './screens/HomeScreen';
 import {NameScreen} from './screens/NameScreen';
 import {SignInScreen} from './screens/SignInScreen';
+import {EnrollEmailScreen} from './screens/EnrollEmailScreen';
+import {SignInWithEmailScreen} from './screens/SignInWithEmailScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {VerifySmsScreen} from './screens/VerifySmsScreen';
 import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
@@ -147,18 +148,22 @@ function App() {
 export default App;
 
 function SignInModal({route}: any) {
-  const {phoneNumber, phoneNumberVerified, givenName, familyName} = route.params;
+  const {username, phoneNumber, phoneNumberVerified, givenName, familyName} = route.params;
 
   const getInitialRouteName = () => {
-    if (phoneNumber) {
+    if (!username) {
+      return 'SignInWithEmail';
+    }
+
+    if (username && phoneNumber) {
       return 'VerifySms';
     }
 
-    if (!phoneNumberVerified) {
+    if (username && !phoneNumberVerified) {
       return 'EnrollSms';
     }
 
-    if (!givenName || !familyName) {
+    if (username && phoneNumberVerified && (!givenName || !familyName)) {
       return 'Name';
     }
   };
@@ -172,6 +177,7 @@ function SignInModal({route}: any) {
       <Stack.Group>
         <Stack.Screen name="EnrollSms" component={EnrollSmsScreen} initialParams={route.params} />
         <Stack.Screen name="VerifySms" component={VerifySmsScreen} initialParams={route.params} />
+        <Stack.Screen name="SignInWithEmail" component={SignInWithEmailScreen} initialParams={route.params} />
         <Stack.Screen name="EnrollEmail" component={EnrollEmailScreen} initialParams={route.params} />
         <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} initialParams={route.params} />
         <Stack.Screen name="Name" component={NameScreen} initialParams={route.params} />

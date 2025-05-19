@@ -4,7 +4,7 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
 import {useAppContext} from '../context';
-import {respondToSmsChallenge} from '../cognito';
+import {respondToAuthChallenge} from '../cognito';
 import {verifyAuthenticator} from '../api';
 
 export function VerifySmsScreen({navigation, route}: any) {
@@ -49,7 +49,7 @@ export function VerifySmsScreen({navigation, route}: any) {
               if (session) {
                 // If a Cognito session is present we're signing the user in via SMS
                 // In this case we need to respond to the Cognito challenge
-                await respondToSmsChallenge({session, username, answer: data.token});
+                await respondToAuthChallenge({session, username, answer: data.token});
               } else {
                 // Otherwise the user is already signed in via Google
                 // In this case we need to finish verifying the SMS authenticator

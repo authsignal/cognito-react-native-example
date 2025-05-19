@@ -6,6 +6,7 @@ const url = `https://${API_GATEWAY_ID}.execute-api.${AWS_REGION}.amazonaws.com`;
 
 interface StartSignInInput {
   phoneNumber?: string;
+  email?: string;
   idToken?: string | null;
 }
 

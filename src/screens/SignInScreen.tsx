@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
+import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
-import {Button, SocialLoginButton} from '../components/Button';
+import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
 import {initiateSmsAuth, handleTokenAuth} from '../cognito';
 import {startSignIn} from '../api';
@@ -14,28 +14,32 @@ export function SignInScreen({navigation}: any) {
 
   const [phoneNumber, setPhoneNumber] = useState('+64');
 
-  // Show sign-in with passkey prompt if credential available
-  useEffect(() => {
-    async function signInWithPasskey() {
-      const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
+  async function signInWithPasskey({showErrorAlert}: {showErrorAlert?: boolean} = {}) {
+    const {data, errorCode} = await authsignal.passkey.signIn({action: 'cognitoAuth'});
 
-      if (errorCode === 'user_canceled' || errorCode === 'no_credential' || !data) {
-        return;
+    if (errorCode === 'user_canceled' || errorCode === 'no_credential' || !data) {
+      if (showErrorAlert) {
+        Alert.alert('No passkey available.');
       }
 
-      try {
-        const {username, token} = data;
-
-        await handleTokenAuth({username, token, signInMethod: 'PASSKEY'});
-
-        await setUserAttributes();
-      } catch (error) {
-        if (error instanceof Error) {
-          Alert.alert('Error', error.message);
-        }
-      }
+      return;
     }
 
+    try {
+      const {username, token} = data;
+
+      await handleTokenAuth({username, token, signInMethod: 'PASSKEY'});
+
+      await setUserAttributes();
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert('Error', error.message);
+      }
+    }
+  }
+
+  // Show passkey sign-in prompt when screen 1st appears if credential available
+  useEffect(() => {
     signInWithPasskey();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -49,10 +53,6 @@ export function SignInScreen({navigation}: any) {
       }
 
       const {session, token, phoneNumberVerified} = await initiateSmsAuth(username);
-
-      if (!token) {
-        throw new Error('No Authsignal token returned from Create Auth Challenge lambda');
-      }
 
       await authsignal.setToken(token);
 
@@ -115,25 +115,49 @@ export function SignInScreen({navigation}: any) {
     }
   };
 
+  const onPressContinueWithEmail = async () => {
+    navigation.navigate('SignInModal', {initialRoute: 'SignInWithEmail'});
+  };
+
+  const onPressPasskeySignIn = async () => {
+    await signInWithPasskey({showErrorAlert: true});
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
       <Text style={styles.header}>Get started with Simplify</Text>
       <Text style={styles.text}>Mobile number</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Phone number"
-        onChangeText={setPhoneNumber}
-        value={phoneNumber}
-        autoCapitalize={'none'}
-        autoCorrect={false}
-        autoFocus={true}
-        textContentType={'telephoneNumber'}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Phone number"
+          onChangeText={setPhoneNumber}
+          value={phoneNumber}
+          autoCapitalize={'none'}
+          autoCorrect={false}
+          autoFocus={true}
+          textContentType={'telephoneNumber'}
+        />
+        <TouchableOpacity onPress={onPressPasskeySignIn}>
+          <Image style={styles.passkeyIcon} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
+        </TouchableOpacity>
+      </View>
       <Button onPress={onPressContinue}>Continue</Button>
-      <Text style={styles.or}>OR</Text>
-      <SocialLoginButton type="google" onPress={onPressContinueWithGoogle} />
-      <SocialLoginButton type="apple" onPress={onPressContinueWithApple} />
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.or}>or</Text>
+        <View style={styles.divider} />
+      </View>
+      <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
+        Continue with Google
+      </Button>
+      <Button theme="secondary" image={require('../../images/apple-icon.png')} onPress={onPressContinueWithApple}>
+        Continue with Apple
+      </Button>
+      <Button theme="secondary" icon="envelope" onPress={onPressContinueWithEmail}>
+        Continue with email
+      </Button>
     </SafeAreaView>
   );
 }
@@ -145,12 +169,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
+  inputContainer: {
+    alignSelf: 'stretch',
+    height: 46,
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 12,
+  },
   input: {
     backgroundColor: '#E8E8E8',
     alignSelf: 'stretch',
-    marginHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 20,
     height: 46,
     borderRadius: 6,
     padding: 10,
@@ -169,7 +197,27 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%',
   },
-  or: {
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
     marginBottom: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E8E8E8',
+    flex: 1,
+  },
+  or: {
+    paddingHorizontal: 10,
+    color: '#A8A8A8',
+  },
+  passkeyIcon: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    margin: 12,
+    right: 0,
+    bottom: 0,
   },
 });

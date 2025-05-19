@@ -1,14 +1,17 @@
 import React, {useState} from 'react';
 import {ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface Props {
   children: any;
   disabled?: boolean;
   theme?: 'primary' | 'secondary';
+  image?: any;
+  icon?: string;
   onPress: () => Promise<void> | void;
 }
 
-export const Button = ({children, disabled, theme = 'primary', onPress}: Props) => {
+export const Button = ({children, disabled, theme = 'primary', image, icon, onPress}: Props) => {
   const [loading, setLoading] = useState(false);
 
   return (
@@ -25,59 +28,10 @@ export const Button = ({children, disabled, theme = 'primary', onPress}: Props) 
       {loading ? (
         <ActivityIndicator color={theme === 'primary' ? 'white' : 'black'} />
       ) : (
-        <Text style={[styles.text, theme === 'primary' ? styles.textPrimary : styles.textSecondary]}>{children}</Text>
-      )}
-    </TouchableOpacity>
-  );
-};
-
-interface SocialLoginButtonProps {
-  type: 'google' | 'apple';
-  onPress: () => Promise<void> | void;
-}
-
-export const SocialLoginButton = ({type, onPress}: SocialLoginButtonProps) => {
-  const [loading, setLoading] = useState(false);
-
-  function getImageSource() {
-    switch (type) {
-      case 'google':
-        return require('../../images/google-icon.png');
-      case 'apple':
-        return require('../../images/apple-icon.png');
-      default:
-        throw new Error('Invalid button type');
-    }
-  }
-
-  function getText() {
-    switch (type) {
-      case 'google':
-        return 'Continue with Google';
-      case 'apple':
-        return 'Continue with Apple';
-      default:
-        throw new Error('Invalid button type');
-    }
-  }
-
-  return (
-    <TouchableOpacity
-      style={[styles.background, styles.backgroundSecondary]}
-      disabled={loading}
-      onPress={async () => {
-        setLoading(true);
-
-        await onPress();
-
-        setLoading(false);
-      }}>
-      {loading ? (
-        <ActivityIndicator color={'black'} />
-      ) : (
         <View style={styles.row}>
-          <Image style={styles.icon} resizeMode={'contain'} source={getImageSource()} />
-          <Text style={[styles.text, styles.textSecondary]}>{getText()}</Text>
+          {image && <Image style={styles.image} resizeMode={'contain'} source={image} />}
+          {icon && <Icon style={styles.icon} name={icon} size={16} color={theme === 'primary' ? 'white' : 'black'} />}
+          <Text style={[styles.text, theme === 'primary' ? styles.textPrimary : styles.textSecondary]}>{children}</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -117,9 +71,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  icon: {
+  image: {
     width: 20,
     height: 20,
+    marginRight: 10,
+  },
+  icon: {
     marginRight: 10,
   },
 });

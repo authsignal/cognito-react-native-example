@@ -5,17 +5,22 @@ import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
 import {verifyAuthenticator} from '../api';
 import {useAppContext} from '../context';
+import {respondToAuthChallenge} from '../cognito';
 
 export function VerifyEmailScreen({navigation, route}: any) {
   const {setUserAttributes} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {email} = route.params;
+  const {username, email, emailVerified, session} = route.params;
 
   const sendEmail = useCallback(async () => {
-    await authsignal.email.enroll({email});
-  }, [email]);
+    if (emailVerified) {
+      await authsignal.email.challenge();
+    } else {
+      await authsignal.email.enroll({email});
+    }
+  }, [email, emailVerified]);
 
   useEffect(() => {
     sendEmail();
@@ -41,11 +46,21 @@ export function VerifyEmailScreen({navigation, route}: any) {
             Alert.alert('Invalid code');
           } else {
             try {
-              await verifyAuthenticator(data.token);
+              if (session) {
+                // If a Cognito session is present we're signing the user in via SMS
+                // In this case we need to respond to the Cognito challenge
+                await respondToAuthChallenge({session, username, answer: data.token});
+              } else {
+                // Otherwise the user is already signed in via Google
+                // In this case we need to finish verifying the SMS authenticator
+                await verifyAuthenticator(data.token);
+              }
 
-              const userAttributes = await setUserAttributes();
+              const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
-              if (!userAttributes.givenName || !userAttributes.familyName) {
+              if (!phoneNumberVerified) {
+                navigation.navigate('EnrollSms');
+              } else if (!givenName || !familyName) {
                 navigation.navigate('Name');
               }
             } catch (ex) {
