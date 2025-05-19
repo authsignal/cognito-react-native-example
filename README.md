@@ -4,15 +4,17 @@ This app is designed to be used alongside [these Cognito lambdas](https://github
 
 The example is inspired by the Uber app. It uses Authsignal SDKs to support the following authentication features.
 
-- Users can sign-in for the first time via SMS OTP or via Google sign-in
+- Users can sign-in for the first time via SMS OTP, email OTP, or via Apple or Google sign-in
 - Users are prompted to create a passkey for future sign-ins
-
-![Sign-in with passkey](sign-in.png)
 
 The example also demonstrates how to use Authsignal SDKs to implement the following:
 
 - Ensure both email and phone number are verified in the initial registration flow
 - Register the device for push auth and respond to authorization requests
+
+## Example app
+
+<img src="sign-in.png" alt="sign-in" width="300"/>
 
 ## Getting started
 
