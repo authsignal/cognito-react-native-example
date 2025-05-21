@@ -51,8 +51,8 @@ export function VerifySmsScreen({navigation, route}: any) {
                 // In this case we need to respond to the Cognito challenge
                 await respondToAuthChallenge({session, username, answer: data.token});
               } else {
-                // Otherwise the user is already signed in via Google
-                // In this case we need to finish verifying the SMS authenticator
+                // Otherwise the user has already signed in via email, Apple, or Google
+                // In this case we need to finish verifying the new SMS authenticator
                 await verifyAuthenticator(data.token);
               }
 

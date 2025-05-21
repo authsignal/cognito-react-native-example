@@ -10,7 +10,9 @@ const config = {
 };
 
 export const signInWithGoogle = async () => {
-  const authState = await authorize(config);
+  const authorizeResult = await authorize(config);
 
-  return authState;
+  return {
+    idToken: authorizeResult.idToken,
+  };
 };

@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface Props {
   children: any;
+  loading?: boolean;
   disabled?: boolean;
   theme?: 'primary' | 'secondary';
   image?: any;
@@ -11,7 +12,9 @@ interface Props {
   onPress: () => Promise<void> | void;
 }
 
-export const Button = ({children, disabled, theme = 'primary', image, icon, onPress}: Props) => {
+export const Button = (props: Props) => {
+  const {children, disabled, theme = 'primary', image, icon, onPress} = props;
+
   const [loading, setLoading] = useState(false);
 
   return (
@@ -25,7 +28,7 @@ export const Button = ({children, disabled, theme = 'primary', image, icon, onPr
 
         setLoading(false);
       }}>
-      {loading ? (
+      {props.loading || loading ? (
         <ActivityIndicator color={theme === 'primary' ? 'white' : 'black'} />
       ) : (
         <View style={styles.row}>

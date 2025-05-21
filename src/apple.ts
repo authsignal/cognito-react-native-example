@@ -6,5 +6,7 @@ export async function signInWithApple() {
     requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
   });
 
-  return appleAuthRequestResponse;
+  return {
+    idToken: appleAuthRequestResponse.identityToken,
+  };
 }

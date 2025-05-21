@@ -106,6 +106,7 @@ function App() {
               name="Home"
               component={HomeScreen}
               options={{
+                animation: 'fade',
                 // eslint-disable-next-line react/no-unstable-nested-components
                 headerTitle: () => (
                   <Image style={styles.headerTitle} resizeMode={'contain'} source={require('../images/simplify.png')} />

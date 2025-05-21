@@ -47,12 +47,12 @@ export function VerifyEmailScreen({navigation, route}: any) {
           } else {
             try {
               if (session) {
-                // If a Cognito session is present we're signing the user in via SMS
+                // If a Cognito session is present we're signing the user in via email
                 // In this case we need to respond to the Cognito challenge
                 await respondToAuthChallenge({session, username, answer: data.token});
               } else {
-                // Otherwise the user is already signed in via Google
-                // In this case we need to finish verifying the SMS authenticator
+                // Otherwise the user has already signed in via SMS
+                // In this case we need to finish verifying the email OTP authenticator
                 await verifyAuthenticator(data.token);
               }
 

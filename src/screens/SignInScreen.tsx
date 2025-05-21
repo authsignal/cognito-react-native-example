@@ -12,6 +12,8 @@ import {signInWithGoogle} from '../google';
 export function SignInScreen({navigation}: any) {
   const {setUserAttributes} = useAppContext();
 
+  const [loading, setLoading] = useState(false);
+
   const [phoneNumber, setPhoneNumber] = useState('+64');
 
   async function signInWithPasskey() {
@@ -20,6 +22,8 @@ export function SignInScreen({navigation}: any) {
     if (errorCode === 'user_canceled' || errorCode === 'no_credential' || !data) {
       return;
     }
+
+    setLoading(true);
 
     try {
       const {username, token} = data;
@@ -31,6 +35,8 @@ export function SignInScreen({navigation}: any) {
       if (error instanceof Error) {
         Alert.alert('Error', error.message);
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -61,6 +67,31 @@ export function SignInScreen({navigation}: any) {
     }
   };
 
+  const onPressContinueWithApple = async () => {
+    try {
+      const {idToken} = await signInWithApple();
+
+      const {username} = await startSignIn({idToken});
+
+      if (!username) {
+        throw new Error('startSignIn error');
+      }
+
+      await handleTokenAuth({username, token: idToken, signInMethod: 'APPLE'});
+
+      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
+
+      // If this is the first time signing in with Apple, we need to capture & verify additional attributes
+      if (!phoneNumberVerified || !givenName || !familyName) {
+        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        Alert.alert('Error', err.message);
+      }
+    }
+  };
+
   const onPressContinueWithGoogle = async () => {
     try {
       const {idToken} = await signInWithGoogle();
@@ -76,31 +107,6 @@ export function SignInScreen({navigation}: any) {
       const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
       // If this is the first time signing in with Google, we need to capture & verify additional attributes
-      if (!phoneNumberVerified || !givenName || !familyName) {
-        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        Alert.alert('Error', err.message);
-      }
-    }
-  };
-
-  const onPressContinueWithApple = async () => {
-    try {
-      const {identityToken: idToken} = await signInWithApple();
-
-      const {username} = await startSignIn({idToken});
-
-      if (!username) {
-        throw new Error('startSignIn error');
-      }
-
-      await handleTokenAuth({username, token: idToken, signInMethod: 'APPLE'});
-
-      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
-
-      // If this is the first time signing in with Apple, we need to capture & verify additional attributes
       if (!phoneNumberVerified || !givenName || !familyName) {
         navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
       }
@@ -135,17 +141,19 @@ export function SignInScreen({navigation}: any) {
           <Image style={styles.passkeyIcon} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
         </TouchableOpacity>
       </View>
-      <Button onPress={onPressContinue}>Continue</Button>
+      <Button loading={loading} onPress={onPressContinue}>
+        Continue
+      </Button>
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
         <Text style={styles.or}>or</Text>
         <View style={styles.divider} />
       </View>
-      <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
-        Continue with Google
-      </Button>
       <Button theme="secondary" image={require('../../images/apple-icon.png')} onPress={onPressContinueWithApple}>
         Continue with Apple
+      </Button>
+      <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
+        Continue with Google
       </Button>
       <Button theme="secondary" icon="envelope" onPress={onPressContinueWithEmail}>
         Continue with email

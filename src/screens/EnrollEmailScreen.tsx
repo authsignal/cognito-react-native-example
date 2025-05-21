@@ -18,6 +18,7 @@ export function EnrollEmailScreen({navigation}: any) {
         autoFocus={true}
         textContentType={'emailAddress'}
         autoCapitalize={'none'}
+        autoCorrect={false}
       />
       <Button
         disabled={email.length === 0}
