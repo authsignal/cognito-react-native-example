@@ -61,7 +61,13 @@ function App() {
       const accessToken = await getAccessToken();
 
       if (accessToken) {
-        await setUserAttributes();
+        try {
+          await setUserAttributes();
+        } catch (error) {
+          // Clear access token if no longer valid
+          // TODO: Use refresh tokens
+          await clearAccessToken();
+        }
       }
 
       setInitialized(true);
