@@ -26,7 +26,7 @@ export function EnrollEmailScreen({navigation}: any) {
           try {
             await addAuthenticator();
 
-            navigation.navigate('VerifyEmail', {email});
+            navigation.navigate('VerifyEmail', {email, session: null});
           } catch (ex) {
             if (ex instanceof Error) {
               return Alert.alert('Error', ex.message);
