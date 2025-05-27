@@ -24,7 +24,7 @@ export function EnrollEmailScreen({navigation}: any) {
         disabled={email.length === 0}
         onPress={async () => {
           try {
-            await addAuthenticator();
+            await addAuthenticator({email});
 
             navigation.navigate('VerifyEmail', {email, session: null});
           } catch (ex) {

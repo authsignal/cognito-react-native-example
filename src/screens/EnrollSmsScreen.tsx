@@ -23,7 +23,7 @@ export function EnrollSmsScreen({navigation}: any) {
         disabled={phoneNumber.length === 0}
         onPress={async () => {
           try {
-            await addAuthenticator();
+            await addAuthenticator({phoneNumber});
 
             navigation.navigate('VerifySms', {phoneNumber});
           } catch (ex) {

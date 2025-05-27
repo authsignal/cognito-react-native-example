@@ -8,3 +8,5 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+-dontwarn org.slf4j.impl.StaticLoggerBinder

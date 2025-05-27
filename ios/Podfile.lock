@@ -5,7 +5,7 @@ PODS:
   - AppAuth/Core (1.7.6)
   - AppAuth/ExternalUserAgent (1.7.6):
     - AppAuth/Core
-  - Authsignal (1.0.16)
+  - Authsignal (1.1.3)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - fast_float (6.1.4)
@@ -1343,8 +1343,8 @@ PODS:
   - react-native-app-auth (8.0.2):
     - AppAuth (>= 1.7.6)
     - React-Core
-  - react-native-authsignal (1.1.10):
-    - Authsignal (= 1.0.16)
+  - react-native-authsignal (1.2.1):
+    - Authsignal (= 1.1.3)
     - RCT-Folly
     - RCTRequired
     - RCTTypeSafety
@@ -2131,7 +2131,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
-  Authsignal: c699dffc20d7510c4bb7614b6d41d189b35f14b1
+  Authsignal: 94abaf54f2cc5dd03948bfedd5470a695a5c9404
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
@@ -2172,7 +2172,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 08d7cddd2dcd2cc51c424931cca9ef507f7afe7b
   React-microtasksnativemodule: cd8733e55d2bc53f5342d2c8e26c8c9bae82a999
   react-native-app-auth: 390986b663497d92de5c00d77b6e2c947d52995e
-  react-native-authsignal: eb5d2ff6be59738bfdec889dc93ee6159eed07c4
+  react-native-authsignal: 80cfce0a015d9dc68c104fc49b895d1aaaa7b181
   react-native-get-random-values: 21325b2244dfa6b58878f51f9aa42821e7ba3d06
   react-native-safe-area-context: 55dbcf556a51092ddf163b29febbc07dc7f14ebb
   React-NativeModulesApple: b0bd6d12dc7b554676bdd1be5c4ddaa5ff125ae0

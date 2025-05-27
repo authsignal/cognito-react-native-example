@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
 import {Button} from '../components/Button';
@@ -12,19 +12,11 @@ export function VerifySmsScreen({navigation, route}: any) {
 
   const [code, setCode] = useState('');
 
-  const {username, phoneNumber, phoneNumberVerified, session} = route.params;
-
-  const sendSms = useCallback(async () => {
-    if (phoneNumberVerified) {
-      await authsignal.sms.challenge();
-    } else {
-      await authsignal.sms.enroll({phoneNumber});
-    }
-  }, [phoneNumber, phoneNumberVerified]);
+  const {username, phoneNumber, session} = route.params;
 
   useEffect(() => {
-    sendSms();
-  }, [sendSms]);
+    authsignal.sms.challenge();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,7 +70,7 @@ export function VerifySmsScreen({navigation, route}: any) {
           onPress={async () => {
             setCode('');
 
-            await sendSms();
+            await authsignal.sms.challenge();
 
             Alert.alert('Verification code re-sent');
           }}>

@@ -21,11 +21,17 @@ export async function startSignIn(input: StartSignInInput): Promise<StartSignInR
   }).then(res => res.json());
 }
 
-export async function addAuthenticator() {
+interface AddAuthenticatorInput {
+  phoneNumber?: string;
+  email?: string;
+}
+
+export async function addAuthenticator(input: AddAuthenticatorInput = {}) {
   const accessToken = await getAccessToken();
 
   const response = await fetch(`${url}/authenticators`, {
     method: 'POST',
+    body: JSON.stringify(input),
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

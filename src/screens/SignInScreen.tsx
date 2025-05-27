@@ -54,12 +54,12 @@ export function SignInScreen({navigation}: any) {
         throw new Error('startSignIn error');
       }
 
-      const {session, token, phoneNumberVerified} = await initiateSmsAuth(username);
+      const {session, token} = await initiateSmsAuth(username);
 
       await authsignal.setToken(token);
 
       // If this is the first timing signing in with SMS, we need to capture & verify additional attributes
-      navigation.navigate('SignInModal', {username, phoneNumber, phoneNumberVerified, session});
+      navigation.navigate('SignInModal', {username, phoneNumber, session});
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert('Invalid credentials', err.message);
@@ -118,7 +118,7 @@ export function SignInScreen({navigation}: any) {
   };
 
   const onPressContinueWithEmail = async () => {
-    navigation.navigate('SignInModal', {initialRoute: 'SignInWithEmail'});
+    navigation.navigate('SignInModal');
   };
 
   return (

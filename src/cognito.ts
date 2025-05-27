@@ -67,13 +67,11 @@ export async function initiateSmsAuth(username: string) {
   });
 
   const token = challengeResponse.ChallengeParameters!.token;
-  const phoneNumberVerified = challengeResponse.ChallengeParameters?.phoneNumberVerified === 'true';
   const session = challengeResponse.Session;
 
   return {
     session,
     token,
-    phoneNumberVerified,
   };
 }
 
@@ -88,13 +86,11 @@ export async function initiateEmailAuth(username: string) {
   });
 
   const token = challengeResponse.ChallengeParameters!.token;
-  const emailVerified = challengeResponse.ChallengeParameters?.emailVerified === 'true';
   const session = challengeResponse.Session;
 
   return {
     session,
     token,
-    emailVerified,
   };
 }
 

@@ -17,11 +17,11 @@ export function SignInWithEmailScreen({navigation}: any) {
         throw new Error('startSignIn error');
       }
 
-      const {session, token, emailVerified} = await initiateEmailAuth(username);
+      const {session, token} = await initiateEmailAuth(username);
 
       await authsignal.setToken(token);
 
-      navigation.navigate('VerifyEmail', {username, email, emailVerified, session});
+      navigation.navigate('VerifyEmail', {username, email, session});
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert('Invalid credentials', err.message);

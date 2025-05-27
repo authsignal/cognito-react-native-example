@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
 import {Button} from '../components/Button';
@@ -12,19 +12,11 @@ export function VerifyEmailScreen({navigation, route}: any) {
 
   const [code, setCode] = useState('');
 
-  const {username, email, emailVerified, session} = route.params;
-
-  const sendEmail = useCallback(async () => {
-    if (emailVerified) {
-      await authsignal.email.challenge();
-    } else {
-      await authsignal.email.enroll({email});
-    }
-  }, [email, emailVerified]);
+  const {username, email, session} = route.params;
 
   useEffect(() => {
-    sendEmail();
-  }, [sendEmail]);
+    authsignal.email.challenge();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,7 +70,7 @@ export function VerifyEmailScreen({navigation, route}: any) {
           onPress={async () => {
             setCode('');
 
-            await sendEmail();
+            await authsignal.email.challenge();
 
             Alert.alert('Verification code re-sent');
           }}>

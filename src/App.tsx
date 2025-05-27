@@ -155,7 +155,7 @@ function App() {
 export default App;
 
 function SignInModal({route}: any) {
-  const {username, phoneNumber, phoneNumberVerified, givenName, familyName} = route.params;
+  const {username, phoneNumber, phoneNumberVerified, givenName, familyName} = route.params ?? {};
 
   const getInitialRouteName = () => {
     if (!username) {
