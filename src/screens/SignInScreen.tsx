@@ -3,8 +3,8 @@ import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacit
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {initiateSmsAuth, handleTokenAuth} from '../cognito';
-import {startSignIn} from '../api';
+import {handleCognitoAuth} from '../cognito';
+import {initSmsChallenge, initSocialAuth} from '../api';
 import {useAppContext} from '../context';
 import {signInWithApple} from '../apple';
 import {signInWithGoogle} from '../google';
@@ -26,9 +26,9 @@ export function SignInScreen({navigation}: any) {
     setLoading(true);
 
     try {
-      const {username, token} = data;
+      const {userId, token} = data;
 
-      await handleTokenAuth({username, token, signInMethod: 'PASSKEY'});
+      await handleCognitoAuth({username: userId, token});
 
       await setUserAttributes();
     } catch (error) {
@@ -48,18 +48,9 @@ export function SignInScreen({navigation}: any) {
 
   const onPressContinue = async () => {
     try {
-      const {username} = await startSignIn({phoneNumber});
+      const {challengeId} = await initSmsChallenge({phoneNumber});
 
-      if (!username) {
-        throw new Error('startSignIn error');
-      }
-
-      const {session, token} = await initiateSmsAuth(username);
-
-      await authsignal.setToken(token);
-
-      // If this is the first timing signing in with SMS, we need to capture & verify additional attributes
-      navigation.navigate('SignInModal', {username, phoneNumber, session});
+      navigation.navigate('SignInModal', {phoneNumber, challengeId});
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert('Invalid credentials', err.message);
@@ -71,13 +62,9 @@ export function SignInScreen({navigation}: any) {
     try {
       const {idToken} = await signInWithApple();
 
-      const {username} = await startSignIn({idToken});
+      const {username} = await initSocialAuth({idToken});
 
-      if (!username) {
-        throw new Error('startSignIn error');
-      }
-
-      await handleTokenAuth({username, token: idToken, signInMethod: 'APPLE'});
+      await handleCognitoAuth({username, token: idToken});
 
       const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
@@ -96,13 +83,13 @@ export function SignInScreen({navigation}: any) {
     try {
       const {idToken} = await signInWithGoogle();
 
-      const {username} = await startSignIn({idToken});
+      const {username} = await initSocialAuth({idToken});
 
       if (!username) {
         throw new Error('startSignIn error');
       }
 
-      await handleTokenAuth({username, token: idToken, signInMethod: 'GOOGLE'});
+      await handleCognitoAuth({username, token: idToken});
 
       const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
 
@@ -115,10 +102,6 @@ export function SignInScreen({navigation}: any) {
         Alert.alert('Error', err.message);
       }
     }
-  };
-
-  const onPressContinueWithEmail = async () => {
-    navigation.navigate('SignInModal');
   };
 
   return (
@@ -154,9 +137,6 @@ export function SignInScreen({navigation}: any) {
       </Button>
       <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
         Continue with Google
-      </Button>
-      <Button theme="secondary" icon="envelope" onPress={onPressContinueWithEmail}>
-        Continue with email
       </Button>
     </SafeAreaView>
   );

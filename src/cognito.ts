@@ -31,7 +31,7 @@ interface RespondToAuthChallengeInput {
   clientMetadata?: Record<string, string>;
 }
 
-export async function respondToAuthChallenge(input: RespondToAuthChallengeInput) {
+async function respondToAuthChallenge(input: RespondToAuthChallengeInput) {
   const {session, username, answer, clientMetadata} = input;
 
   const command = new RespondToAuthChallengeCommand({
@@ -56,68 +56,20 @@ export async function respondToAuthChallenge(input: RespondToAuthChallengeInput)
   return output;
 }
 
-export async function initiateSmsAuth(username: string) {
-  const provideAuthParamsOutput = await initiateAuth(username);
-
-  const challengeResponse = await respondToAuthChallenge({
-    session: provideAuthParamsOutput.Session,
-    username,
-    answer: '__dummy__',
-    clientMetadata: {signInMethod: 'SMS'},
-  });
-
-  const token = challengeResponse.ChallengeParameters!.token;
-  const session = challengeResponse.Session;
-
-  return {
-    session,
-    token,
-  };
-}
-
-export async function initiateEmailAuth(username: string) {
-  const provideAuthParamsOutput = await initiateAuth(username);
-
-  const challengeResponse = await respondToAuthChallenge({
-    session: provideAuthParamsOutput.Session,
-    username,
-    answer: '__dummy__',
-    clientMetadata: {signInMethod: 'EMAIL'},
-  });
-
-  const token = challengeResponse.ChallengeParameters!.token;
-  const session = challengeResponse.Session;
-
-  return {
-    session,
-    token,
-  };
-}
-
-interface TokenAuthInput {
+interface CognitoAuthInput {
   username?: string;
   token?: string | null;
-  signInMethod: 'PASSKEY' | 'APPLE' | 'GOOGLE';
 }
 
-export async function handleTokenAuth({username, token, signInMethod}: TokenAuthInput): Promise<void> {
+export async function handleCognitoAuth({username, token}: CognitoAuthInput): Promise<void> {
   if (!username || !token) {
-    throw new Error('Username and token are required for token auth');
+    throw new Error('Username and token are required for Cognito auth');
   }
 
   const provideAuthParamsOutput = await initiateAuth(username);
 
-  // Provide auth params
-  const authParamsOutput = await respondToAuthChallenge({
-    session: provideAuthParamsOutput.Session,
-    username,
-    clientMetadata: {signInMethod},
-    answer: '__dummy__',
-  });
-
-  // Verify challenge with token
   const challengeOutput = await respondToAuthChallenge({
-    session: authParamsOutput.Session,
+    session: provideAuthParamsOutput.Session,
     username,
     answer: token,
   });

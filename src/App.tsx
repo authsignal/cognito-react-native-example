@@ -10,7 +10,6 @@ import {HomeScreen} from './screens/HomeScreen';
 import {NameScreen} from './screens/NameScreen';
 import {SignInScreen} from './screens/SignInScreen';
 import {EnrollEmailScreen} from './screens/EnrollEmailScreen';
-import {SignInWithEmailScreen} from './screens/SignInWithEmailScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {VerifySmsScreen} from './screens/VerifySmsScreen';
 import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
@@ -155,11 +154,11 @@ function App() {
 export default App;
 
 function SignInModal({route}: any) {
-  const {username, phoneNumber, phoneNumberVerified, givenName, familyName} = route.params ?? {};
+  const {username, phoneNumber, phoneNumberVerified, givenName, familyName, challengeId} = route.params ?? {};
 
   const getInitialRouteName = () => {
-    if (!username) {
-      return 'SignInWithEmail';
+    if (phoneNumber && challengeId) {
+      return 'VerifySms';
     }
 
     if (username && phoneNumber) {
@@ -184,7 +183,6 @@ function SignInModal({route}: any) {
       <Stack.Group>
         <Stack.Screen name="EnrollSms" component={EnrollSmsScreen} initialParams={route.params} />
         <Stack.Screen name="VerifySms" component={VerifySmsScreen} initialParams={route.params} />
-        <Stack.Screen name="SignInWithEmail" component={SignInWithEmailScreen} initialParams={route.params} />
         <Stack.Screen name="EnrollEmail" component={EnrollEmailScreen} initialParams={route.params} />
         <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} initialParams={route.params} />
         <Stack.Screen name="Name" component={NameScreen} initialParams={route.params} />

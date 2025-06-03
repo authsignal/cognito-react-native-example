@@ -4,18 +4,55 @@ import {authsignal} from './authsignal';
 
 const url = `https://${API_GATEWAY_ID}.execute-api.${AWS_REGION}.amazonaws.com`;
 
-interface StartSignInInput {
+interface InitSmsChallengeInput {
+  phoneNumber: string;
+}
+
+interface InitSmsChallengeResponse {
+  challengeId: string;
+}
+
+export async function initSmsChallenge(input: InitSmsChallengeInput): Promise<InitSmsChallengeResponse> {
+  return await fetch(`${url}/challenge/sms`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  }).then(res => res.json());
+}
+
+interface VerifySmsChallengeInput {
+  challengeId: string;
+  verificationCode: string;
+  phoneNumber: string;
+}
+
+interface VerifySmsChallengeResponse {
+  isVerified: boolean;
+  userId?: string;
+  token?: string;
+}
+
+export async function verifySmsChallenge(input: VerifySmsChallengeInput): Promise<VerifySmsChallengeResponse> {
+  return await fetch(`${url}/verify/sms`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  }).then(res => res.json());
+}
+
+interface AddAuthenticatorInput {
   phoneNumber?: string;
   email?: string;
+}
+
+interface SocialAuthInput {
   idToken?: string | null;
 }
 
-interface StartSignInResponse {
-  username?: string;
+interface SocialAuthResponse {
+  username: string;
 }
 
-export async function startSignIn(input: StartSignInInput): Promise<StartSignInResponse> {
-  return await fetch(`${url}/start-sign-in`, {
+export async function initSocialAuth(input: SocialAuthInput): Promise<SocialAuthResponse> {
+  return await fetch(`${url}/init-social-auth`, {
     method: 'POST',
     body: JSON.stringify(input),
   }).then(res => res.json());

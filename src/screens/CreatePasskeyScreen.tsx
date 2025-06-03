@@ -7,7 +7,7 @@ import {addAuthenticator} from '../api';
 import {useAppContext} from '../context';
 
 export function CreatePasskeyScreen({navigation}: any) {
-  const {username, givenName, familyName} = useAppContext();
+  const {email, givenName, familyName} = useAppContext();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -20,7 +20,7 @@ export function CreatePasskeyScreen({navigation}: any) {
           await addAuthenticator();
 
           const {error} = await authsignal.passkey.signUp({
-            username,
+            username: email,
             displayName: `${givenName} ${familyName}`,
           });
 

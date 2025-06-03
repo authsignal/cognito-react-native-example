@@ -1,22 +1,17 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
+import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
-import {authsignal} from '../authsignal';
 import {useAppContext} from '../context';
-import {respondToAuthChallenge} from '../cognito';
-import {verifyAuthenticator} from '../api';
+import {handleCognitoAuth} from '../cognito';
+import {verifySmsChallenge} from '../api';
 
 export function VerifySmsScreen({navigation, route}: any) {
   const {setUserAttributes} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {username, phoneNumber, session} = route.params;
-
-  useEffect(() => {
-    authsignal.sms.challenge();
-  }, []);
+  const {phoneNumber, challengeId} = route.params;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -33,28 +28,24 @@ export function VerifySmsScreen({navigation, route}: any) {
       <Button
         onPress={async () => {
           try {
-            const {data, error} = await authsignal.sms.verify({code});
+            const {isVerified, userId, token} = await verifySmsChallenge({
+              challengeId,
+              verificationCode: code,
+              phoneNumber,
+            });
 
-            if (error || !data?.token) {
-              Alert.alert('Invalid code');
-            } else {
-              if (session) {
-                // If a Cognito session is present we're signing the user in via SMS
-                // In this case we need to respond to the Cognito challenge
-                await respondToAuthChallenge({session, username, answer: data.token});
-              } else {
-                // Otherwise the user has already signed in via email, Apple, or Google
-                // In this case we need to finish verifying the new SMS authenticator
-                await verifyAuthenticator(data.token);
-              }
+            if (!isVerified) {
+              return Alert.alert('Invalid code');
+            }
 
-              const {emailVerified, givenName, familyName} = await setUserAttributes();
+            await handleCognitoAuth({username: userId, token});
 
-              if (!emailVerified) {
-                navigation.navigate('EnrollEmail');
-              } else if (!givenName || !familyName) {
-                navigation.navigate('Name');
-              }
+            const {emailVerified, givenName, familyName} = await setUserAttributes();
+
+            if (!emailVerified) {
+              navigation.navigate('EnrollEmail');
+            } else if (!givenName || !familyName) {
+              navigation.navigate('Name');
             }
           } catch (err) {
             if (err instanceof Error) {
@@ -64,19 +55,6 @@ export function VerifySmsScreen({navigation, route}: any) {
         }}>
         Confirm
       </Button>
-      <View style={styles.center}>
-        <Text>Didn't receive a code?</Text>
-        <TouchableOpacity
-          onPress={async () => {
-            setCode('');
-
-            await authsignal.sms.challenge();
-
-            Alert.alert('Verification code re-sent');
-          }}>
-          <Text style={styles.link}>Re-send it</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -101,19 +79,10 @@ const styles = StyleSheet.create({
   text: {
     marginHorizontal: 20,
   },
-  link: {
-    color: '#525EEA',
-    marginLeft: 5,
-  },
   header: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 10,
-    marginHorizontal: 20,
-  },
-  center: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     marginHorizontal: 20,
   },
 });
