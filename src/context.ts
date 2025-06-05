@@ -5,8 +5,6 @@ export type AppContextType = {
   username?: string;
   email?: string;
   phoneNumber?: string;
-  givenName?: string;
-  familyName?: string;
   setUserAttributes: () => Promise<CognitoUserAttributes>;
   clearUserAttributes: () => void;
 };

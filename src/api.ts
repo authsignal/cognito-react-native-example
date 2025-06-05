@@ -22,13 +22,13 @@ export async function initSmsChallenge(input: InitSmsChallengeInput): Promise<In
 interface VerifySmsChallengeInput {
   challengeId: string;
   verificationCode: string;
-  phoneNumber: string;
 }
 
 interface VerifySmsChallengeResponse {
   isVerified: boolean;
   userId?: string;
   token?: string;
+  emailVerified?: boolean;
 }
 
 export async function verifySmsChallenge(input: VerifySmsChallengeInput): Promise<VerifySmsChallengeResponse> {
@@ -36,11 +36,6 @@ export async function verifySmsChallenge(input: VerifySmsChallengeInput): Promis
     method: 'POST',
     body: JSON.stringify(input),
   }).then(res => res.json());
-}
-
-interface AddAuthenticatorInput {
-  phoneNumber?: string;
-  email?: string;
 }
 
 interface SocialAuthInput {
@@ -58,33 +53,15 @@ export async function initSocialAuth(input: SocialAuthInput): Promise<SocialAuth
   }).then(res => res.json());
 }
 
-interface AddAuthenticatorInput {
-  phoneNumber?: string;
-  email?: string;
-}
-
-export async function addAuthenticator(input: AddAuthenticatorInput = {}) {
+export async function authorizePasskeyCreation() {
   const accessToken = await getAccessToken();
 
-  const response = await fetch(`${url}/authenticators`, {
+  const response = await fetch(`${url}/authenticators/passkey`, {
     method: 'POST',
-    body: JSON.stringify(input),
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   }).then(res => res.json());
 
   await authsignal.setToken(response.authsignalToken);
-}
-
-export async function verifyAuthenticator(token: string) {
-  const accessToken = await getAccessToken();
-
-  await fetch(`${url}/authenticators/verify`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({token}),
-  });
 }

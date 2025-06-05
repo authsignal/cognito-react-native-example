@@ -3,19 +3,21 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {verifyAuthenticator} from '../api';
 import {useAppContext} from '../context';
+import {handleCognitoAuth} from '../cognito';
 
-export function VerifyEmailScreen({navigation, route}: any) {
+export function VerifyEmailScreen({route}: any) {
   const {setUserAttributes} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {email} = route.params;
+  const {username, email} = route.params;
 
   useEffect(() => {
-    authsignal.email.challenge();
-  }, []);
+    if (email) {
+      authsignal.email.enroll({email});
+    }
+  }, [email]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,15 +39,9 @@ export function VerifyEmailScreen({navigation, route}: any) {
             Alert.alert('Invalid code');
           } else {
             try {
-              await verifyAuthenticator(data.token);
+              await handleCognitoAuth({username, token: data.token});
 
-              const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
-
-              if (!phoneNumberVerified) {
-                navigation.navigate('EnrollSms');
-              } else if (!givenName || !familyName) {
-                navigation.navigate('Name');
-              }
+              await setUserAttributes();
             } catch (ex) {
               if (ex instanceof Error) {
                 return Alert.alert('Error', ex.message);
@@ -61,7 +57,7 @@ export function VerifyEmailScreen({navigation, route}: any) {
           onPress={async () => {
             setCode('');
 
-            await authsignal.email.challenge();
+            await authsignal.email.enroll({email});
 
             Alert.alert('Verification code re-sent');
           }}>

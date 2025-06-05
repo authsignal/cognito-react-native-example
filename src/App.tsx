@@ -5,14 +5,11 @@ import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
-import {PushChallengeScreen} from './screens/PushChallengeScreen';
 import {HomeScreen} from './screens/HomeScreen';
-import {NameScreen} from './screens/NameScreen';
 import {SignInScreen} from './screens/SignInScreen';
 import {EnrollEmailScreen} from './screens/EnrollEmailScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {VerifySmsScreen} from './screens/VerifySmsScreen';
-import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
 import {AppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 import {authsignal} from './authsignal';
@@ -24,8 +21,6 @@ function App() {
   const [username, setUsername] = useState<string | undefined>();
   const [email, setEmail] = useState<string | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
-  const [givenName, setGivenName] = useState<string | undefined>();
-  const [familyName, setFamilyName] = useState<string | undefined>();
 
   const setUserAttributes = useCallback(async () => {
     const attrs = await getUserAttributes();
@@ -38,11 +33,6 @@ function App() {
       setPhoneNumber(attrs.phoneNumber);
     }
 
-    if (attrs.givenName && attrs.familyName) {
-      setGivenName(attrs.givenName);
-      setFamilyName(attrs.familyName);
-    }
-
     setUsername(attrs.username);
 
     return attrs;
@@ -50,8 +40,6 @@ function App() {
 
   const clearUserAttributes = useCallback(() => {
     setEmail(undefined);
-    setGivenName(undefined);
-    setFamilyName(undefined);
     setUsername(undefined);
   }, []);
 
@@ -80,12 +68,10 @@ function App() {
       username,
       email,
       phoneNumber,
-      givenName,
-      familyName,
       setUserAttributes,
       clearUserAttributes,
     }),
-    [username, email, phoneNumber, givenName, familyName, setUserAttributes, clearUserAttributes],
+    [username, email, phoneNumber, setUserAttributes, clearUserAttributes],
   );
 
   const onSignOutPressed = async () => {
@@ -100,7 +86,7 @@ function App() {
     return null;
   }
 
-  const hasAllUserAttributes = !!email && !!phoneNumber && !!givenName && !!familyName;
+  const hasAllUserAttributes = !!email && !!phoneNumber;
 
   return (
     <AppContext.Provider value={appContext}>
@@ -137,7 +123,6 @@ function App() {
             />
             <Stack.Group screenOptions={{presentation: 'modal', headerShown: false}}>
               <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
-              <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
             </Stack.Group>
           </Stack.Navigator>
         ) : (
@@ -154,38 +139,12 @@ function App() {
 export default App;
 
 function SignInModal({route}: any) {
-  const {username, phoneNumber, phoneNumberVerified, givenName, familyName, challengeId} = route.params ?? {};
-
-  const getInitialRouteName = () => {
-    if (phoneNumber && challengeId) {
-      return 'VerifySms';
-    }
-
-    if (username && phoneNumber) {
-      return 'VerifySms';
-    }
-
-    if (username && !phoneNumberVerified) {
-      return 'EnrollSms';
-    }
-
-    if (username && phoneNumberVerified && (!givenName || !familyName)) {
-      return 'Name';
-    }
-  };
-
-  const initialRouteName = getInitialRouteName();
-
   return (
-    <Stack.Navigator
-      initialRouteName={initialRouteName}
-      screenOptions={{headerShown: true, title: '', headerBackTitle: 'Back'}}>
+    <Stack.Navigator screenOptions={{headerShown: true, title: '', headerBackTitle: 'Back'}}>
       <Stack.Group>
-        <Stack.Screen name="EnrollSms" component={EnrollSmsScreen} initialParams={route.params} />
         <Stack.Screen name="VerifySms" component={VerifySmsScreen} initialParams={route.params} />
         <Stack.Screen name="EnrollEmail" component={EnrollEmailScreen} initialParams={route.params} />
         <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} initialParams={route.params} />
-        <Stack.Screen name="Name" component={NameScreen} initialParams={route.params} />
       </Stack.Group>
     </Stack.Navigator>
   );

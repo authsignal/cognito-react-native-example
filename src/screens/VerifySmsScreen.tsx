@@ -2,9 +2,10 @@ import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
-import {useAppContext} from '../context';
-import {handleCognitoAuth} from '../cognito';
 import {verifySmsChallenge} from '../api';
+import {authsignal} from '../authsignal';
+import {handleCognitoAuth} from '../cognito';
+import {useAppContext} from '../context';
 
 export function VerifySmsScreen({navigation, route}: any) {
   const {setUserAttributes} = useAppContext();
@@ -28,24 +29,27 @@ export function VerifySmsScreen({navigation, route}: any) {
       <Button
         onPress={async () => {
           try {
-            const {isVerified, userId, token} = await verifySmsChallenge({
+            const {isVerified, userId, token, emailVerified} = await verifySmsChallenge({
               challengeId,
               verificationCode: code,
-              phoneNumber,
             });
 
-            if (!isVerified) {
+            if (!isVerified || !token) {
               return Alert.alert('Invalid code');
             }
 
-            await handleCognitoAuth({username: userId, token});
+            if (emailVerified) {
+              // If email is verified, proceed with Cognito auth
+              // In this case we use the token obtained from the SMS verification
+              await handleCognitoAuth({username: userId, token});
 
-            const {emailVerified, givenName, familyName} = await setUserAttributes();
+              await setUserAttributes();
+            } else {
+              // If the email is not verified we will use the Authsignal SDK to verify it
+              // Set the token on the Authsignal SDK to authorize this for the user
+              await authsignal.setToken(token);
 
-            if (!emailVerified) {
-              navigation.navigate('EnrollEmail');
-            } else if (!givenName || !familyName) {
-              navigation.navigate('Name');
+              navigation.navigate('EnrollEmail', {username: userId});
             }
           } catch (err) {
             if (err instanceof Error) {

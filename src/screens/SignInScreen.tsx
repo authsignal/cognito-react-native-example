@@ -26,9 +26,9 @@ export function SignInScreen({navigation}: any) {
     setLoading(true);
 
     try {
-      const {userId, token} = data;
+      const {userId: username, token} = data;
 
-      await handleCognitoAuth({username: userId, token});
+      await handleCognitoAuth({username, token});
 
       await setUserAttributes();
     } catch (error) {
@@ -66,12 +66,7 @@ export function SignInScreen({navigation}: any) {
 
       await handleCognitoAuth({username, token: idToken});
 
-      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
-
-      // If this is the first time signing in with Apple, we need to capture & verify additional attributes
-      if (!phoneNumberVerified || !givenName || !familyName) {
-        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
-      }
+      await setUserAttributes();
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert('Error', err.message);
@@ -91,12 +86,7 @@ export function SignInScreen({navigation}: any) {
 
       await handleCognitoAuth({username, token: idToken});
 
-      const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
-
-      // If this is the first time signing in with Google, we need to capture & verify additional attributes
-      if (!phoneNumberVerified || !givenName || !familyName) {
-        navigation.navigate('SignInModal', {username, phoneNumberVerified, givenName, familyName});
-      }
+      await setUserAttributes();
     } catch (err) {
       if (err instanceof Error) {
         Alert.alert('Error', err.message);

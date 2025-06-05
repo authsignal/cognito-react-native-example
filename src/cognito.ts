@@ -93,38 +93,12 @@ export async function clearAccessToken(): Promise<void> {
   await AsyncStorage.removeItem('@access_token');
 }
 
-export async function updateNameAttributes(givenName: string, familyName: string) {
-  const accessToken = await getAccessToken();
-
-  if (!accessToken) {
-    throw new Error('No access token found');
-  }
-
-  const updateUserAttributesCommand = new UpdateUserAttributesCommand({
-    UserAttributes: [
-      {
-        Name: 'given_name',
-        Value: givenName,
-      },
-      {
-        Name: 'family_name',
-        Value: familyName,
-      },
-    ],
-    AccessToken: accessToken,
-  });
-
-  await cognito.send(updateUserAttributesCommand);
-}
-
 export interface CognitoUserAttributes {
   username?: string;
   phoneNumber?: string;
   phoneNumberVerified: boolean;
   email?: string;
   emailVerified: boolean;
-  givenName?: string;
-  familyName?: string;
 }
 
 export async function getUserAttributes(): Promise<CognitoUserAttributes> {
@@ -144,8 +118,6 @@ export async function getUserAttributes(): Promise<CognitoUserAttributes> {
     getUserOutput.UserAttributes?.find(attr => attr.Name === 'phone_number_verified')?.Value === 'true';
   const email = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email')?.Value;
   const emailVerified = getUserOutput.UserAttributes?.find(attr => attr.Name === 'email_verified')?.Value === 'true';
-  const givenName = getUserOutput.UserAttributes?.find(attr => attr.Name === 'given_name')?.Value;
-  const familyName = getUserOutput.UserAttributes?.find(attr => attr.Name === 'family_name')?.Value;
 
   return {
     username,
@@ -153,7 +125,5 @@ export async function getUserAttributes(): Promise<CognitoUserAttributes> {
     phoneNumberVerified,
     email,
     emailVerified,
-    givenName,
-    familyName,
   };
 }

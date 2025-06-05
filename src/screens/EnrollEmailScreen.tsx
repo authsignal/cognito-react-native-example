@@ -2,10 +2,11 @@ import React, {useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
-import {addAuthenticator} from '../api';
 
-export function EnrollEmailScreen({navigation}: any) {
+export function EnrollEmailScreen({navigation, route}: any) {
   const [email, setEmail] = useState('');
+
+  const {username} = route.params;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,9 +25,7 @@ export function EnrollEmailScreen({navigation}: any) {
         disabled={email.length === 0}
         onPress={async () => {
           try {
-            await addAuthenticator({email});
-
-            navigation.navigate('VerifyEmail', {email, session: null});
+            navigation.navigate('VerifyEmail', {username, email});
           } catch (ex) {
             if (ex instanceof Error) {
               return Alert.alert('Error', ex.message);

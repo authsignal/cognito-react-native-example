@@ -3,11 +3,11 @@ import {Alert, Image, SafeAreaView, StyleSheet, Text} from 'react-native';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {addAuthenticator} from '../api';
+import {authorizePasskeyCreation} from '../api';
 import {useAppContext} from '../context';
 
 export function CreatePasskeyScreen({navigation}: any) {
-  const {email, givenName, familyName} = useAppContext();
+  const {email} = useAppContext();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -17,12 +17,9 @@ export function CreatePasskeyScreen({navigation}: any) {
 
       <Button
         onPress={async () => {
-          await addAuthenticator();
+          await authorizePasskeyCreation();
 
-          const {error} = await authsignal.passkey.signUp({
-            username: email,
-            displayName: `${givenName} ${familyName}`,
-          });
+          const {error} = await authsignal.passkey.signUp({username: email});
 
           if (!error) {
             Alert.alert('Passkey created.', 'You can now use your passkey to sign in.', [
