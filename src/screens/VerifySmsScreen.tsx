@@ -3,8 +3,7 @@ import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
 import {verifySmsChallenge} from '../api';
-import {authsignal} from '../authsignal';
-import {handleCognitoAuth} from '../cognito';
+import {setAccessToken} from '../cognito';
 import {useAppContext} from '../context';
 
 export function VerifySmsScreen({navigation, route}: any) {
@@ -29,27 +28,22 @@ export function VerifySmsScreen({navigation, route}: any) {
       <Button
         onPress={async () => {
           try {
-            const {isVerified, userId, token, emailVerified} = await verifySmsChallenge({
+            const {isVerified, accessToken} = await verifySmsChallenge({
               challengeId,
               verificationCode: code,
             });
 
-            if (!isVerified || !token) {
+            if (!isVerified) {
               return Alert.alert('Invalid code');
             }
 
-            if (emailVerified) {
-              // If email is verified, proceed with Cognito auth
-              // In this case we use the token obtained from the SMS verification
-              await handleCognitoAuth({username: userId, token});
+            // If access token is present, email must already be verified
+            if (accessToken) {
+              await setAccessToken(accessToken);
 
               await setUserAttributes();
             } else {
-              // If the email is not verified we will use the Authsignal SDK to verify it
-              // Set the token on the Authsignal SDK to authorize this for the user
-              await authsignal.setToken(token);
-
-              navigation.navigate('EnrollEmail', {username: userId});
+              navigation.navigate('EnrollEmail', {smsChallengeId: challengeId});
             }
           } catch (err) {
             if (err instanceof Error) {

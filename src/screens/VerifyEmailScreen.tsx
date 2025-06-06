@@ -1,23 +1,17 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
+import {Alert, SafeAreaView, StyleSheet, Text, TextInput} from 'react-native';
 
 import {Button} from '../components/Button';
-import {authsignal} from '../authsignal';
 import {useAppContext} from '../context';
-import {handleCognitoAuth} from '../cognito';
+import {setAccessToken} from '../cognito';
+import {verifyEmailChallenge} from '../api';
 
 export function VerifyEmailScreen({route}: any) {
   const {setUserAttributes} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {username, email} = route.params;
-
-  useEffect(() => {
-    if (email) {
-      authsignal.email.enroll({email});
-    }
-  }, [email]);
+  const {email, smsChallengeId, emailChallengeId} = route.params;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -33,37 +27,29 @@ export function VerifyEmailScreen({route}: any) {
       />
       <Button
         onPress={async () => {
-          const {data, error} = await authsignal.email.verify({code});
+          const {isVerified, accessToken} = await verifyEmailChallenge({
+            smsChallengeId,
+            emailChallengeId,
+            emailVerificationCode: code,
+          });
 
-          if (error || !data?.token) {
-            Alert.alert('Invalid code');
+          console.log('isVerified', isVerified);
+          console.log('accessToken', accessToken);
+
+          if (!isVerified) {
+            return Alert.alert('Invalid code');
+          }
+
+          if (accessToken) {
+            await setAccessToken(accessToken);
+
+            await setUserAttributes();
           } else {
-            try {
-              await handleCognitoAuth({username, token: data.token});
-
-              await setUserAttributes();
-            } catch (ex) {
-              if (ex instanceof Error) {
-                return Alert.alert('Error', ex.message);
-              }
-            }
+            Alert.alert('Unexpected error');
           }
         }}>
         Confirm
       </Button>
-      <View style={styles.center}>
-        <Text>Didn't receive a code?</Text>
-        <TouchableOpacity
-          onPress={async () => {
-            setCode('');
-
-            await authsignal.email.enroll({email});
-
-            Alert.alert('Verification code re-sent');
-          }}>
-          <Text style={styles.link}>Re-send it</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -88,19 +74,10 @@ const styles = StyleSheet.create({
   text: {
     marginHorizontal: 20,
   },
-  link: {
-    color: '#525EEA',
-    marginLeft: 5,
-  },
   header: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 10,
-    marginHorizontal: 20,
-  },
-  center: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     marginHorizontal: 20,
   },
 });

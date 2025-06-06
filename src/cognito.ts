@@ -5,7 +5,6 @@ import {
   GetUserCommand,
   InitiateAuthCommand,
   RespondToAuthChallengeCommand,
-  UpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import {AWS_REGION, USER_POOL_CLIENT_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,7 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const cognito = new CognitoIdentityProviderClient({region: AWS_REGION});
 
 async function initiateAuth(username: string) {
-  const initiateAuthCommand = new InitiateAuthCommand({
+  const command = new InitiateAuthCommand({
     ClientId: USER_POOL_CLIENT_ID,
     AuthFlow: AuthFlowType.CUSTOM_AUTH,
     AuthParameters: {
@@ -21,7 +20,7 @@ async function initiateAuth(username: string) {
     },
   });
 
-  return await cognito.send(initiateAuthCommand);
+  return await cognito.send(command);
 }
 
 interface RespondToAuthChallengeInput {
@@ -50,7 +49,7 @@ async function respondToAuthChallenge(input: RespondToAuthChallengeInput) {
   const accessToken = output.AuthenticationResult?.AccessToken;
 
   if (accessToken) {
-    await AsyncStorage.setItem('@access_token', accessToken);
+    await setAccessToken(accessToken);
   }
 
   return output;
@@ -80,6 +79,10 @@ export async function handleCognitoAuth({username, token}: CognitoAuthInput): Pr
     throw new Error('Cognito did not return an access token');
   }
 
+  await setAccessToken(accessToken);
+}
+
+export async function setAccessToken(accessToken: string): Promise<void> {
   await AsyncStorage.setItem('@access_token', accessToken);
 }
 

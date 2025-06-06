@@ -26,13 +26,44 @@ interface VerifySmsChallengeInput {
 
 interface VerifySmsChallengeResponse {
   isVerified: boolean;
-  userId?: string;
-  token?: string;
-  emailVerified?: boolean;
+  accessToken?: string;
 }
 
 export async function verifySmsChallenge(input: VerifySmsChallengeInput): Promise<VerifySmsChallengeResponse> {
   return await fetch(`${url}/verify/sms`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  }).then(res => res.json());
+}
+
+interface InitEmailChallengeInput {
+  email: string;
+}
+
+interface InitEmailChallengeResponse {
+  challengeId: string;
+}
+
+export async function initEmailChallenge(input: InitEmailChallengeInput): Promise<InitEmailChallengeResponse> {
+  return await fetch(`${url}/challenge/email`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  }).then(res => res.json());
+}
+
+interface VerifyEmailChallengeInput {
+  smsChallengeId: string;
+  emailChallengeId: string;
+  emailVerificationCode: string;
+}
+
+interface VerifyEmailChallengeResponse {
+  isVerified: boolean;
+  accessToken?: string;
+}
+
+export async function verifyEmailChallenge(input: VerifyEmailChallengeInput): Promise<VerifyEmailChallengeResponse> {
+  return await fetch(`${url}/verify/email`, {
     method: 'POST',
     body: JSON.stringify(input),
   }).then(res => res.json());
