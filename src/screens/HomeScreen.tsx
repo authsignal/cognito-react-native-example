@@ -1,61 +1,32 @@
 import React, {useEffect} from 'react';
-import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
+import {ScrollView, StyleSheet} from 'react-native';
 
 import {authsignal} from '../authsignal';
-import {addAuthenticator} from '../api';
+import {Button} from '../components/Button';
 
 export function HomeScreen({navigation}: any) {
   // Prompt to create passkey
   useEffect(() => {
     (async () => {
-      const isPasskeyAvailable = await authsignal.passkey.isAvailableOnDevice();
+      const [isPasskeyAvailable, deviceCredentialResponse] = await Promise.all([
+        authsignal.passkey.isAvailableOnDevice(),
+        authsignal.push.getCredential(),
+      ]);
 
-      if (!isPasskeyAvailable) {
+      const deviceCredential = deviceCredentialResponse.data;
+
+      console.log('isPasskeyAvailable:', isPasskeyAvailable);
+      console.log('deviceCredential:', deviceCredential);
+
+      if (!isPasskeyAvailable && !deviceCredential) {
         navigation.navigate('CreatePasskey');
-      }
-    })();
-  }, [navigation]);
-
-  // Push auth
-  useEffect(() => {
-    async function checkForPendingChallenge() {
-      console.log('Checking for pending push challenge...');
-
-      const {data, error} = await authsignal.push.getChallenge();
-
-      if (error) {
-        Alert.alert('Error getting push challenge', error);
-      } else if (data?.challengeId) {
-        navigation.navigate('PushChallenge', {challengeId: data.challengeId});
-      }
-    }
-
-    async function registerDevice() {
-      await addAuthenticator();
-
-      const {error} = await authsignal.push.addCredential();
-
-      if (error) {
-        Alert.alert('Error adding push credential', error);
-      } else {
-        console.log('Push credential added.');
-      }
-    }
-
-    (async () => {
-      const {data: existingCredential} = await authsignal.push.getCredential();
-
-      if (existingCredential) {
-        await checkForPendingChallenge();
-      } else {
-        await registerDevice();
       }
     })();
   }, [navigation]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Home</Text>
+      <Button onPress={async () => navigation.navigate('DeviceChallenge')}>Authorize request</Button>
     </ScrollView>
   );
 }

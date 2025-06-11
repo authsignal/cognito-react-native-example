@@ -5,7 +5,8 @@ import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
-import {PushChallengeScreen} from './screens/PushChallengeScreen';
+import {CreatePinScreen} from './screens/CreatePinScreen';
+import {DeviceChallengeScreen} from './screens/DeviceChallengeScreen';
 import {HomeScreen} from './screens/HomeScreen';
 import {NameScreen} from './screens/NameScreen';
 import {SignInScreen} from './screens/SignInScreen';
@@ -138,7 +139,8 @@ function App() {
             />
             <Stack.Group screenOptions={{presentation: 'modal', headerShown: false}}>
               <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
-              <Stack.Screen name="PushChallenge" component={PushChallengeScreen} />
+              <Stack.Screen name="DeviceChallenge" component={DeviceChallengeScreen} />
+              <Stack.Screen name="CreatePin" component={CreatePinScreen} />
             </Stack.Group>
           </Stack.Navigator>
         ) : (

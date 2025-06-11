@@ -4,30 +4,20 @@ import {SafeAreaView, StyleSheet, Text} from 'react-native';
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
 
-export function PushChallengeScreen({navigation, route}: any) {
-  const {challengeId} = route.params;
-
+export function DeviceChallengeScreen({navigation}: any) {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Authorize request</Text>
-      <Text style={styles.text}>Your approval is required to authorize a sign-in request.</Text>
 
       <Button
         onPress={async () => {
+          const challengeId = '';
+
           await authsignal.push.updateChallenge({challengeId, approved: true});
 
           navigation.goBack();
         }}>
-        Approve
-      </Button>
-      <Button
-        theme="secondary"
-        onPress={async () => {
-          await authsignal.push.updateChallenge({challengeId, approved: true});
-
-          navigation.goBack();
-        }}>
-        Deny
+        Authorize
       </Button>
     </SafeAreaView>
   );

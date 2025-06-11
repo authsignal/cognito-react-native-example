@@ -14,7 +14,6 @@ export function CreatePasskeyScreen({navigation}: any) {
       <Image style={styles.image} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
       <Text style={styles.header}>Create a passkey</Text>
       <Text style={styles.text}>Passkeys are easier and more secure than passwords.</Text>
-
       <Button
         onPress={async () => {
           await addAuthenticator();
@@ -37,9 +36,9 @@ export function CreatePasskeyScreen({navigation}: any) {
       <Button
         theme="secondary"
         onPress={async () => {
-          navigation.goBack();
+          navigation.navigate('CreatePin');
         }}>
-        Not now
+        Create a PIN instead
       </Button>
     </SafeAreaView>
   );

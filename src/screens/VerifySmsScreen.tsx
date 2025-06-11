@@ -36,9 +36,11 @@ export function VerifySmsScreen({navigation, route}: any) {
             const {data, error} = await authsignal.sms.verify({code});
 
             if (error || !data?.token) {
-              Alert.alert('Invalid code');
+              Alert.alert('Invalid code', 'Reason: ' + data?.failureReason);
             } else {
               if (session) {
+                console.log('Responding to Cognito challenge', {session, username, answer: data.token});
+
                 // If a Cognito session is present we're signing the user in via SMS
                 // In this case we need to respond to the Cognito challenge
                 await respondToAuthChallenge({session, username, answer: data.token});
