@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
 import {CreatePinScreen} from './screens/CreatePinScreen';
-import {DeviceChallengeScreen} from './screens/DeviceChallengeScreen';
+import {PinEntryScreen} from './screens/PinEntryScreen';
 import {HomeScreen} from './screens/HomeScreen';
 import {NameScreen} from './screens/NameScreen';
 import {SignInScreen} from './screens/SignInScreen';
@@ -18,6 +18,7 @@ import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
 import {AppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 import {authsignal} from './authsignal';
+import {PushCredential} from 'react-native-authsignal';
 
 const Stack = createStackNavigator();
 
@@ -28,6 +29,7 @@ function App() {
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [givenName, setGivenName] = useState<string | undefined>();
   const [familyName, setFamilyName] = useState<string | undefined>();
+  const [deviceCredential, setCredential] = useState<PushCredential | undefined>();
 
   const setUserAttributes = useCallback(async () => {
     const attrs = await getUserAttributes();
@@ -57,8 +59,18 @@ function App() {
     setUsername(undefined);
   }, []);
 
+  const setDeviceCredential = (credential: PushCredential | undefined) => {
+    setCredential(credential);
+  };
+
   useEffect(() => {
     const initUser = async () => {
+      const {data: credential} = await authsignal.device.getCredential();
+
+      if (credential) {
+        setDeviceCredential(credential);
+      }
+
       const accessToken = await getAccessToken();
 
       if (accessToken) {
@@ -84,18 +96,22 @@ function App() {
       phoneNumber,
       givenName,
       familyName,
+      deviceCredential,
       setUserAttributes,
       clearUserAttributes,
+      setDeviceCredential,
     }),
-    [username, email, phoneNumber, givenName, familyName, setUserAttributes, clearUserAttributes],
+    [username, email, phoneNumber, givenName, familyName, deviceCredential, setUserAttributes, clearUserAttributes],
   );
 
   const onSignOutPressed = async () => {
-    await authsignal.push.removeCredential();
+    await authsignal.device.removeCredential();
 
     await clearAccessToken();
 
     clearUserAttributes();
+
+    setDeviceCredential(undefined);
   };
 
   if (!initialized) {
@@ -109,38 +125,45 @@ function App() {
       <NavigationContainer>
         {hasAllUserAttributes ? (
           <Stack.Navigator>
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{
-                animation: 'fade',
-                // eslint-disable-next-line react/no-unstable-nested-components
-                headerTitle: () => (
-                  <Image style={styles.headerTitle} resizeMode={'contain'} source={require('../images/simplify.png')} />
-                ),
-                // eslint-disable-next-line react/no-unstable-nested-components
-                headerRight: () => (
-                  <TouchableOpacity
-                    style={styles.headerRight}
-                    onPress={async () => {
-                      Alert.alert('Do you want to sign out?', '', [
-                        {
-                          text: 'Cancel',
-                          style: 'cancel',
-                          onPress: () => {},
-                        },
-                        {text: 'Sign out', onPress: onSignOutPressed},
-                      ]);
-                    }}>
-                    <Icon name="user" size={18} color="#525eea" />
-                  </TouchableOpacity>
-                ),
-              }}
-            />
+            {!deviceCredential ? (
+              <Stack.Screen name="CreatePin" component={CreatePinScreen} options={{headerShown: false}} />
+            ) : (
+              <Stack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                  animation: 'fade',
+                  // eslint-disable-next-line react/no-unstable-nested-components
+                  headerTitle: () => (
+                    <Image
+                      style={styles.headerTitle}
+                      resizeMode={'contain'}
+                      source={require('../images/simplify.png')}
+                    />
+                  ),
+                  // eslint-disable-next-line react/no-unstable-nested-components
+                  headerRight: () => (
+                    <TouchableOpacity
+                      style={styles.headerRight}
+                      onPress={async () => {
+                        Alert.alert('Do you want to sign out?', '', [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel',
+                            onPress: () => {},
+                          },
+                          {text: 'Sign out', onPress: onSignOutPressed},
+                        ]);
+                      }}>
+                      <Icon name="user" size={18} color="#525eea" />
+                    </TouchableOpacity>
+                  ),
+                }}
+              />
+            )}
             <Stack.Group screenOptions={{presentation: 'modal', headerShown: false}}>
               <Stack.Screen name="CreatePasskey" component={CreatePasskeyScreen} />
-              <Stack.Screen name="DeviceChallenge" component={DeviceChallengeScreen} />
-              <Stack.Screen name="CreatePin" component={CreatePinScreen} />
+              <Stack.Screen name="PinEntry" component={PinEntryScreen} />
             </Stack.Group>
           </Stack.Navigator>
         ) : (

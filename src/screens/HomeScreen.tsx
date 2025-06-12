@@ -1,32 +1,43 @@
-import React, {useEffect} from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Alert, ScrollView, StyleSheet, TextInput} from 'react-native';
 
 import {authsignal} from '../authsignal';
 import {Button} from '../components/Button';
 
 export function HomeScreen({navigation}: any) {
+  const [amount, setAmount] = useState('$10,0000.00');
+
   // Prompt to create passkey
   useEffect(() => {
     (async () => {
-      const [isPasskeyAvailable, deviceCredentialResponse] = await Promise.all([
-        authsignal.passkey.isAvailableOnDevice(),
-        authsignal.push.getCredential(),
-      ]);
+      const isPasskeyAvailable = await authsignal.passkey.isAvailableOnDevice();
 
-      const deviceCredential = deviceCredentialResponse.data;
-
-      console.log('isPasskeyAvailable:', isPasskeyAvailable);
-      console.log('deviceCredential:', deviceCredential);
-
-      if (!isPasskeyAvailable && !deviceCredential) {
+      if (!isPasskeyAvailable) {
         navigation.navigate('CreatePasskey');
       }
     })();
   }, [navigation]);
 
+  const onPressTransferFunds = async () => {
+    const {data} = await authsignal.passkey.signIn();
+
+    if (data?.token) {
+      console.log('Validation token obtained:', data.token);
+      // Send token to backend to validate and proceed with payment...
+
+      Alert.alert('Transfer successful.');
+    } else {
+      // Either no passkey is available or the user canceled
+      // iOS does not differentiate between these two cases so we have to treat them identically
+      // We have to fall back to PIN entry in either case
+      navigation.navigate('PinEntry');
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button onPress={async () => navigation.navigate('DeviceChallenge')}>Authorize request</Button>
+      <TextInput style={styles.input} placeholder="Enter amount" onChangeText={setAmount} value={amount} />
+      <Button onPress={onPressTransferFunds}>Transfer funds</Button>
     </ScrollView>
   );
 }
@@ -34,11 +45,18 @@ export function HomeScreen({navigation}: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
   },
-  header: {
-    fontSize: 18,
+  input: {
+    backgroundColor: '#E8E8E8',
+    alignSelf: 'stretch',
+    height: 46,
+    borderRadius: 6,
+    padding: 10,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 12,
   },
 });

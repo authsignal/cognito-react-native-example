@@ -4,43 +4,45 @@ import * as Keychain from 'react-native-keychain';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {addAuthenticator} from '../api';
-import {useAppContext} from '../context';
 
-export function CreatePinScreen() {
-  const {setDeviceCredential} = useAppContext();
-
+export function PinEntryScreen({navigation}: any) {
   const [pin, setPin] = useState('');
+
+  const onPressEnterPin = async () => {
+    const pinCredentials = await Keychain.getGenericPassword({service: '@simplify'});
+
+    if (pinCredentials && pinCredentials.password !== pin) {
+      return Alert.alert('Invalid PIN');
+    }
+
+    const {data} = await authsignal.device.verify();
+
+    if (data?.token) {
+      console.log('Validation token obtained:', data.token);
+
+      // Send token to backend to validation and proceed with payment...
+
+      Alert.alert('Transfer successful.', undefined, [{text: 'OK', onPress: () => navigation.goBack()}]);
+    } else {
+      // Should not get into this state
+      Alert.alert('Error transferring funds.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Create a PIN</Text>
+      <Text style={styles.header}>Enter PIN</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter a 6 digit PIN"
+        placeholder="Enter your 6 digit PIN"
         onChangeText={setPin}
         value={pin}
         autoFocus={true}
         keyboardType={'number-pad'}
         maxLength={6}
+        secureTextEntry={true}
       />
-      <Button
-        disabled={pin.length !== 6}
-        onPress={async () => {
-          await addAuthenticator();
-
-          await Keychain.setGenericPassword('@simplify_user_pin', pin, {service: '@simplify'});
-
-          await authsignal.device.addCredential();
-
-          const {data, error} = await authsignal.device.getCredential();
-
-          if (data) {
-            setDeviceCredential(data);
-          } else {
-            Alert.alert('Error adding PIN', error);
-          }
-        }}>
+      <Button disabled={pin.length !== 6} onPress={onPressEnterPin}>
         Confirm
       </Button>
     </SafeAreaView>

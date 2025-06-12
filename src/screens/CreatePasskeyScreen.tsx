@@ -36,9 +36,9 @@ export function CreatePasskeyScreen({navigation}: any) {
       <Button
         theme="secondary"
         onPress={async () => {
-          navigation.navigate('CreatePin');
+          navigation.goBack();
         }}>
-        Create a PIN instead
+        Not now
       </Button>
     </SafeAreaView>
   );
