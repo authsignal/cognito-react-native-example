@@ -1,5 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  Alert,
+  Image,
+  Keyboard,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
@@ -122,43 +133,49 @@ export function SignInScreen({navigation}: any) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Image source={require('../../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
-      <Text style={styles.header}>Get started with Simplify</Text>
-      <Text style={styles.text}>Mobile number</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Phone number"
-          onChangeText={setPhoneNumber}
-          value={phoneNumber}
-          autoCapitalize={'none'}
-          autoCorrect={false}
-          autoFocus={true}
-          textContentType={'telephoneNumber'}
-        />
-        <TouchableOpacity onPress={signInWithPasskey}>
-          <Image style={styles.passkeyIcon} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />
-        </TouchableOpacity>
-      </View>
-      <Button loading={loading} onPress={onPressContinue}>
-        Continue
-      </Button>
-      <View style={styles.dividerContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.or}>or</Text>
-        <View style={styles.divider} />
-      </View>
-      <Button theme="secondary" image={require('../../images/apple-icon.png')} onPress={onPressContinueWithApple}>
-        Continue with Apple
-      </Button>
-      <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
-        Continue with Google
-      </Button>
-      <Button theme="secondary" icon="envelope" onPress={onPressContinueWithEmail}>
-        Continue with email
-      </Button>
-    </SafeAreaView>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <SafeAreaView style={styles.container}>
+        <Image source={require('../../images/simplify.png')} resizeMode={'contain'} style={styles.logo} />
+        <Text style={styles.header}>Get started with Simplify</Text>
+        <Text style={styles.text}>Mobile number</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Phone number"
+            onChangeText={setPhoneNumber}
+            value={phoneNumber}
+            autoCapitalize={'none'}
+            autoCorrect={false}
+            autoFocus={true}
+            textContentType={'telephoneNumber'}
+          />
+          <TouchableOpacity onPress={signInWithPasskey}>
+            <Image
+              style={styles.passkeyIcon}
+              resizeMode={'contain'}
+              source={require('../../images/passkey-icon.png')}
+            />
+          </TouchableOpacity>
+        </View>
+        <Button loading={loading} onPress={onPressContinue}>
+          Continue
+        </Button>
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.or}>or</Text>
+          <View style={styles.divider} />
+        </View>
+        <Button theme="secondary" image={require('../../images/apple-icon.png')} onPress={onPressContinueWithApple}>
+          Continue with Apple
+        </Button>
+        <Button theme="secondary" image={require('../../images/google-icon.png')} onPress={onPressContinueWithGoogle}>
+          Continue with Google
+        </Button>
+        <Button theme="secondary" icon="envelope" onPress={onPressContinueWithEmail}>
+          Continue with email
+        </Button>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 

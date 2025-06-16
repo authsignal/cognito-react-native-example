@@ -18,7 +18,7 @@ import {EnrollSmsScreen} from './screens/EnrollSmsScreen';
 import {AppContext} from './context';
 import {clearAccessToken, getAccessToken, getUserAttributes} from './cognito';
 import {authsignal} from './authsignal';
-import {PushCredential} from 'react-native-authsignal';
+import {DeviceCredential} from 'react-native-authsignal';
 
 const Stack = createStackNavigator();
 
@@ -29,7 +29,7 @@ function App() {
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [givenName, setGivenName] = useState<string | undefined>();
   const [familyName, setFamilyName] = useState<string | undefined>();
-  const [deviceCredential, setCredential] = useState<PushCredential | undefined>();
+  const [deviceCredential, setCredential] = useState<DeviceCredential | undefined>();
 
   const setUserAttributes = useCallback(async () => {
     const attrs = await getUserAttributes();
@@ -59,7 +59,7 @@ function App() {
     setUsername(undefined);
   }, []);
 
-  const setDeviceCredential = (credential: PushCredential | undefined) => {
+  const setDeviceCredential = (credential: DeviceCredential | undefined) => {
     setCredential(credential);
   };
 

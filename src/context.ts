@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import {CognitoUserAttributes} from './cognito';
-import {PushCredential} from 'react-native-authsignal';
+import {DeviceCredential} from 'react-native-authsignal';
 
 export type AppContextType = {
   username?: string;
@@ -8,10 +8,10 @@ export type AppContextType = {
   phoneNumber?: string;
   givenName?: string;
   familyName?: string;
-  deviceCredential?: PushCredential;
+  deviceCredential?: DeviceCredential;
   setUserAttributes: () => Promise<CognitoUserAttributes>;
   clearUserAttributes: () => void;
-  setDeviceCredential: (credential: PushCredential | undefined) => void;
+  setDeviceCredential: (credential: DeviceCredential | undefined) => void;
 };
 
 export const AppContext = React.createContext<AppContextType>({

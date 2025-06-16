@@ -31,9 +31,7 @@ export function CreatePinScreen() {
 
           await Keychain.setGenericPassword('@simplify_user_pin', pin, {service: '@simplify'});
 
-          await authsignal.device.addCredential();
-
-          const {data, error} = await authsignal.device.getCredential();
+          const {data, error} = await authsignal.device.addCredential();
 
           if (data) {
             setDeviceCredential(data);
