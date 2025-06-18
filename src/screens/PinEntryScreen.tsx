@@ -31,7 +31,6 @@ export function PinEntryScreen({navigation}: any) {
     const {transferCompleted} = await transferFunds({token});
 
     if (transferCompleted) {
-      // No step-up auth is required
       Alert.alert('Transfer successful.', undefined, [{text: 'OK', onPress: () => navigation.goBack()}]);
     } else {
       Alert.alert('Error transferring funds.');
