@@ -4,6 +4,7 @@ import * as Keychain from 'react-native-keychain';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
+import {transferFunds} from '../api';
 
 export function PinEntryScreen({navigation}: any) {
   const [pin, setPin] = useState('');
@@ -15,16 +16,24 @@ export function PinEntryScreen({navigation}: any) {
       return Alert.alert('Invalid PIN');
     }
 
-    const {data} = await authsignal.device.verify();
+    const {data, error} = await authsignal.device.verify();
 
     if (data?.token) {
-      console.log('Validation token obtained:', data.token);
+      // The user successfully authenticated with their device credential
+      // Now we can proceed with the transfer
+      await signTransaction(data.token);
+    } else {
+      Alert.alert('Error transferring funds.', error);
+    }
+  };
 
-      // Send token to backend to validation and proceed with payment...
+  const signTransaction = async (token: string) => {
+    const {transferCompleted} = await transferFunds({token});
 
+    if (transferCompleted) {
+      // No step-up auth is required
       Alert.alert('Transfer successful.', undefined, [{text: 'OK', onPress: () => navigation.goBack()}]);
     } else {
-      // Should not get into this state
       Alert.alert('Error transferring funds.');
     }
   };

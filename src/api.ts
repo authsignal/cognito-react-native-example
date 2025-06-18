@@ -51,3 +51,29 @@ export async function verifyAuthenticator(token: string) {
     body: JSON.stringify({token}),
   });
 }
+
+interface TransferFundsInput {
+  amount?: string;
+  token?: string;
+}
+
+interface TransferFundsResponse {
+  transferCompleted: boolean;
+  token?: string;
+}
+
+export async function transferFunds(input: TransferFundsInput): Promise<TransferFundsResponse> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${url}/transfer-funds`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then(res => res.json());
+
+  return {
+    transferCompleted: response.transferCompleted,
+  };
+}

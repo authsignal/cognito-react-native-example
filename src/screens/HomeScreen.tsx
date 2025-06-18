@@ -3,9 +3,10 @@ import {Alert, ScrollView, StyleSheet, TextInput} from 'react-native';
 
 import {authsignal} from '../authsignal';
 import {Button} from '../components/Button';
+import {transferFunds} from '../api';
 
 export function HomeScreen({navigation}: any) {
-  const [amount, setAmount] = useState('$10,0000.00');
+  const [amount, setAmount] = useState('100000');
 
   // Prompt to create passkey
   useEffect(() => {
@@ -19,18 +20,39 @@ export function HomeScreen({navigation}: any) {
   }, [navigation]);
 
   const onPressTransferFunds = async () => {
+    const {transferCompleted, token} = await transferFunds({amount});
+
+    if (transferCompleted) {
+      // No step-up auth is required
+      return Alert.alert('Transfer successful.');
+    } else if (token) {
+      // Step-up auth is required
+      // Set the token to use Authsignal to sign the transaction
+      await authsignal.setToken(token);
+    }
+
     const {data} = await authsignal.passkey.signIn();
 
     if (data?.token) {
-      console.log('Validation token obtained:', data.token);
-      // Send token to backend to validate and proceed with payment...
-
-      Alert.alert('Transfer successful.');
+      // The user successfully authenticated with their passkey
+      // Now we can proceed with the transfer
+      await signTransaction(data.token);
     } else {
       // Either no passkey is available or the user canceled
       // iOS does not differentiate between these two cases so we have to treat them identically
       // We have to fall back to PIN entry in either case
       navigation.navigate('PinEntry');
+    }
+  };
+
+  const signTransaction = async (token: string) => {
+    const {transferCompleted} = await transferFunds({token});
+
+    if (transferCompleted) {
+      // No step-up auth is required
+      return Alert.alert('Transfer successful.');
+    } else {
+      return Alert.alert('Error transferring funds.');
     }
   };
 
