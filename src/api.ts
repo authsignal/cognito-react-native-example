@@ -73,7 +73,5 @@ export async function transferFunds(input: TransferFundsInput): Promise<Transfer
     },
   }).then(res => res.json());
 
-  return {
-    transferCompleted: response.transferCompleted,
-  };
+  return response;
 }

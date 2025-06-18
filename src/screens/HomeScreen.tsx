@@ -49,7 +49,6 @@ export function HomeScreen({navigation}: any) {
     const {transferCompleted} = await transferFunds({token});
 
     if (transferCompleted) {
-      // No step-up auth is required
       return Alert.alert('Transfer successful.');
     } else {
       return Alert.alert('Error transferring funds.');
