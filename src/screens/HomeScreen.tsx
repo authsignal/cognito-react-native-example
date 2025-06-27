@@ -1,8 +1,7 @@
 import React, {useEffect} from 'react';
-import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
+import {ScrollView, StyleSheet, Text} from 'react-native';
 
 import {authsignal} from '../authsignal';
-import {addAuthenticator} from '../api';
 
 export function HomeScreen({navigation}: any) {
   // Prompt to create passkey
@@ -12,43 +11,6 @@ export function HomeScreen({navigation}: any) {
 
       if (!isPasskeyAvailable) {
         navigation.navigate('CreatePasskey');
-      }
-    })();
-  }, [navigation]);
-
-  // Push auth
-  useEffect(() => {
-    async function checkForPendingChallenge() {
-      console.log('Checking for pending push challenge...');
-
-      const {data, error} = await authsignal.push.getChallenge();
-
-      if (error) {
-        Alert.alert('Error getting push challenge', error);
-      } else if (data?.challengeId) {
-        navigation.navigate('PushChallenge', {challengeId: data.challengeId});
-      }
-    }
-
-    async function registerDevice() {
-      await addAuthenticator();
-
-      const {error} = await authsignal.push.addCredential();
-
-      if (error) {
-        Alert.alert('Error adding push credential', error);
-      } else {
-        console.log('Push credential added.');
-      }
-    }
-
-    (async () => {
-      const {data: existingCredential} = await authsignal.push.getCredential();
-
-      if (existingCredential) {
-        await checkForPendingChallenge();
-      } else {
-        await registerDevice();
       }
     })();
   }, [navigation]);

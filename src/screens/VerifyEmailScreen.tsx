@@ -1,18 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
-import {verifyAuthenticator} from '../api';
 import {useAppContext} from '../context';
-import {respondToAuthChallenge} from '../cognito';
+import {signIn} from '../api';
 
-export function VerifyEmailScreen({navigation, route}: any) {
-  const {setUserAttributes} = useAppContext();
+export function VerifyEmailScreen({route}: any) {
+  const {setAuthenticated, setEmail} = useAppContext();
 
   const [code, setCode] = useState('');
 
-  const {username, email, session} = route.params;
+  const {email} = route.params;
 
   useEffect(() => {
     authsignal.email.challenge();
@@ -38,23 +38,12 @@ export function VerifyEmailScreen({navigation, route}: any) {
             Alert.alert('Invalid code');
           } else {
             try {
-              if (session) {
-                // If a Cognito session is present we're signing the user in via email
-                // In this case we need to respond to the Cognito challenge
-                await respondToAuthChallenge({session, username, answer: data.token});
-              } else {
-                // Otherwise the user has already signed in via SMS
-                // In this case we need to finish verifying the email OTP authenticator
-                await verifyAuthenticator(data.token);
-              }
+              const {accessToken} = await signIn(data.token);
 
-              const {phoneNumberVerified, givenName, familyName} = await setUserAttributes();
+              await AsyncStorage.setItem('@access_token', accessToken);
 
-              if (!phoneNumberVerified) {
-                navigation.navigate('EnrollSms');
-              } else if (!givenName || !familyName) {
-                navigation.navigate('Name');
-              }
+              setEmail(email);
+              setAuthenticated(true);
             } catch (ex) {
               if (ex instanceof Error) {
                 return Alert.alert('Error', ex.message);
