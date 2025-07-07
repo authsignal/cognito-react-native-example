@@ -9,8 +9,6 @@ import {useAppContext} from '../context';
 export function CreatePasskeyScreen({navigation}: any) {
   const {email} = useAppContext();
 
-  console.log('CreatePasskeyScreen', {email});
-
   return (
     <SafeAreaView style={styles.container}>
       <Image style={styles.image} resizeMode={'contain'} source={require('../../images/passkey-icon.png')} />

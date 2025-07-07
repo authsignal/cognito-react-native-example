@@ -10,7 +10,6 @@ import {HomeScreen} from './screens/HomeScreen';
 import {SignInScreen} from './screens/SignInScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {AppContext} from './context';
-import {getUserProfile} from './api';
 
 const Stack = createStackNavigator();
 
@@ -24,12 +23,6 @@ function App() {
       const accessToken = await AsyncStorage.getItem('@access_token');
 
       setAuthenticated(!!accessToken);
-
-      console.log('Access token:', accessToken);
-
-      const userProfile = await getUserProfile();
-
-      setEmail(userProfile.email);
 
       setInitialized(true);
     };

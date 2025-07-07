@@ -1,10 +1,8 @@
-import {API_GATEWAY_ID, AWS_REGION, AUTHSIGNAL_CLIENT} from '@env';
+import {API_GATEWAY_ID, AWS_REGION} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {authsignal} from './authsignal';
 
 const url = `https://${API_GATEWAY_ID}.execute-api.${AWS_REGION}.amazonaws.com`;
-
-const clientId = AUTHSIGNAL_CLIENT;
 
 export async function initEmailSignIn(email: string) {
   const response = await fetch(`${url}/sign-in/email`, {
@@ -23,7 +21,7 @@ interface SignInResponse {
 export async function signIn(token: string): Promise<SignInResponse> {
   return await fetch(`${url}/sign-in`, {
     method: 'POST',
-    body: JSON.stringify({token, clientId}),
+    body: JSON.stringify({token}),
   }).then(res => res.json());
 }
 
@@ -45,10 +43,21 @@ export async function getUserProfile() {
   }).then(res => res.json());
 }
 
+export async function getUserAuthenticators() {
+  const accessToken = await AsyncStorage.getItem('@access_token');
+
+  return await fetch(`${url}/authenticators`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }).then(res => res.json());
+}
+
 export async function initPasskeyRegistration() {
   const accessToken = await AsyncStorage.getItem('@access_token');
 
-  const response = await fetch(`${url}/authenticators`, {
+  const response = await fetch(`${url}/register/passkey`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
