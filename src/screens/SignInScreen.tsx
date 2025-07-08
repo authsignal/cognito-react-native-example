@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {Button} from '../components/Button';
 import {authsignal} from '../authsignal';
@@ -24,9 +23,7 @@ export function SignInScreen({navigation}: any) {
     setLoading(true);
 
     try {
-      const {accessToken} = await signIn(data.token);
-
-      await AsyncStorage.setItem('@access_token', accessToken);
+      await signIn(data.token);
 
       await setAuthenticated(true);
     } catch (error) {

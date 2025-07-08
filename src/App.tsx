@@ -10,6 +10,7 @@ import {HomeScreen} from './screens/HomeScreen';
 import {SignInScreen} from './screens/SignInScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {AppContext} from './context';
+import {signOut} from './api';
 
 const Stack = createStackNavigator();
 
@@ -41,7 +42,7 @@ function App() {
   );
 
   const onSignOutPressed = async () => {
-    await AsyncStorage.removeItem('@access_token');
+    await signOut();
 
     setAuthenticated(false);
   };

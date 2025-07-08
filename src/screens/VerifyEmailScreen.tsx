@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
@@ -38,9 +37,7 @@ export function VerifyEmailScreen({route}: any) {
             Alert.alert('Invalid code');
           } else {
             try {
-              const {accessToken} = await signIn(data.token);
-
-              await AsyncStorage.setItem('@access_token', accessToken);
+              await signIn(data.token);
 
               setEmail(email);
               setAuthenticated(true);

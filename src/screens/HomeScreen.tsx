@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
-import {ScrollView, StyleSheet, Text} from 'react-native';
+import {Alert, ScrollView, StyleSheet, Text} from 'react-native';
 
 import {authsignal} from '../authsignal';
-import {getUserAuthenticators, getUserProfile} from '../api';
+import {getUserProfile} from '../api';
 import {useAppContext} from '../context';
 
 export function HomeScreen({navigation}: any) {
@@ -21,18 +21,16 @@ export function HomeScreen({navigation}: any) {
 
   useEffect(() => {
     (async () => {
-      const userProfile = await getUserProfile();
+      try {
+        const userProfile = await getUserProfile();
 
-      setEmail(userProfile.email);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const userAuthenticators = await getUserAuthenticators();
-
-      console.log('User Authenticators:', userAuthenticators);
+        setEmail(userProfile.email);
+      } catch (error) {
+        Alert.alert(
+          'Error fetching user profile',
+          error instanceof Error ? error.message : 'An unexpected error occurred',
+        );
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
