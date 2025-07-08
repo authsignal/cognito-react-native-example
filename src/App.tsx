@@ -2,7 +2,6 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useMemo, useState} from 'react';
 import {Alert, Image, StyleSheet, TouchableOpacity} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {CreatePasskeyScreen} from './screens/CreatePasskeyScreen';
@@ -10,7 +9,7 @@ import {HomeScreen} from './screens/HomeScreen';
 import {SignInScreen} from './screens/SignInScreen';
 import {VerifyEmailScreen} from './screens/VerifyEmailScreen';
 import {AppContext} from './context';
-import {signOut} from './api';
+import {getAccessToken, signOut} from './api';
 
 const Stack = createStackNavigator();
 
@@ -21,7 +20,7 @@ function App() {
 
   useEffect(() => {
     const initUser = async () => {
-      const accessToken = await AsyncStorage.getItem('@access_token');
+      const accessToken = await getAccessToken();
 
       setAuthenticated(!!accessToken);
 

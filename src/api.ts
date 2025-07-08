@@ -1,5 +1,5 @@
 import {API_GATEWAY_ID, AWS_REGION} from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 
 import {authsignal} from './authsignal';
 
@@ -24,20 +24,20 @@ export async function signIn(token: string): Promise<void> {
     throw new Error('Sign-in failed.');
   }
 
-  await AsyncStorage.setItem('@access_token', response.accessToken);
-  await AsyncStorage.setItem('@refresh_token', response.refreshToken);
+  await setAccessToken(response.accessToken);
+  await setRefreshToken(response.refreshToken);
 }
 
 export async function signOut(): Promise<void> {
-  const accessToken = await AsyncStorage.getItem('@access_token');
+  const accessToken = await getAccessToken();
 
   await fetch(`${url}/sign-out`, {
     method: 'POST',
     body: JSON.stringify({accessToken}),
   });
 
-  await AsyncStorage.removeItem('@access_token');
-  await AsyncStorage.removeItem('@refresh_token');
+  await clearAccessToken();
+  await clearRefreshToken();
 }
 
 export async function getUserAuthenticators() {
@@ -55,7 +55,7 @@ export async function getUserProfile() {
 }
 
 async function fetchWithAuth(path: string, init: RequestInit): Promise<any> {
-  const accessToken = await AsyncStorage.getItem('@access_token');
+  const accessToken = await getAccessToken();
 
   init.headers = {
     ...init.headers,
@@ -67,8 +67,8 @@ async function fetchWithAuth(path: string, init: RequestInit): Promise<any> {
   if (response.status === 401 || response.status === 403) {
     const refreshResponse = await refreshSession();
 
-    await AsyncStorage.setItem('@access_token', refreshResponse.accessToken);
-    await AsyncStorage.setItem('@refresh_token', refreshResponse.refreshToken);
+    await setAccessToken(refreshResponse.accessToken);
+    await setRefreshToken(refreshResponse.refreshToken);
 
     init.headers = {
       ...init.headers,
@@ -100,7 +100,7 @@ async function handleError(response: Response) {
 }
 
 async function refreshSession() {
-  const refreshToken = await AsyncStorage.getItem('@refresh_token');
+  const refreshToken = await getRefreshToken();
 
   const response = await fetch(`${url}/sign-in/refresh`, {
     method: 'POST',
@@ -112,4 +112,37 @@ async function refreshSession() {
   }
 
   return response;
+}
+
+const ACCESS_TOKEN_KEY = '@access_token';
+const ACCESS_TOKEN_OPTS = {service: ACCESS_TOKEN_KEY};
+const REFRESH_TOKEN_KEY = '@refresh_token';
+const REFRESH_TOKEN_OPTS = {service: REFRESH_TOKEN_KEY};
+
+export async function setAccessToken(token: string) {
+  await Keychain.setGenericPassword(ACCESS_TOKEN_KEY, token, ACCESS_TOKEN_OPTS);
+}
+
+async function setRefreshToken(token: string) {
+  await Keychain.setGenericPassword(REFRESH_TOKEN_KEY, token, REFRESH_TOKEN_OPTS);
+}
+
+export async function getAccessToken() {
+  const credentials = await Keychain.getGenericPassword(ACCESS_TOKEN_OPTS);
+
+  return credentials ? credentials.password : undefined;
+}
+
+export async function getRefreshToken() {
+  const credentials = await Keychain.getGenericPassword(REFRESH_TOKEN_OPTS);
+
+  return credentials ? credentials.password : undefined;
+}
+
+export async function clearAccessToken() {
+  await Keychain.resetGenericPassword(ACCESS_TOKEN_OPTS);
+}
+
+export async function clearRefreshToken() {
+  await Keychain.resetGenericPassword(REFRESH_TOKEN_OPTS);
 }
